@@ -5,34 +5,89 @@ const deviceFactoryAbi = require("../Abi/DeviceFactory.json");
 const actionFactoryAbi = require("../Abi/ActionFactory.json");
 const actionAbi = require("../Abi/Action.json");
 const balanceABI = require("../Abi/Balance.json");
+const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
+const organizationABI=require("../Abi/Organization.json");
 
-const provider = new ethers.BrowserProvider(window.ethereum, "any");
+const ORGANIZATION_FACTORY_CONTRACT = "0x333bF3FcBCEa1C25Bc6E6740F0b9fcbDA57405D8";
+const DEVICE_FACTORY_CONTRACT = "0x1A1Ce36B60d8A224D7256A8ac994bC5c7352d075";
+const ACTION_FACCTORY_CONTRACT = "0x1267a75585A235Aa85701523F98D910957420e81";
+const BALANCE_CONTRACT = "0xECCe3E4Bd667fdb13622173b406a80e605AB8C3E";
 
-const DEVICE_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-const ACTION_FACCTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-const DEVICE_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const ACTION_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const BALANCE_CONTRACT = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
-// export  class Chain{
 
-//   constructor(){this.initialize()}
+let provider = new ethers.BrowserProvider(window.ethereum, "any");
 
-//   async initialize(){
-//     this.provider = new ethers.BrowserProvider(window.ethereum,"any");
-//     const chainId=(await this.provider._detectNetwork()).chainId;
+async function setProvider(){
+  
+  let provider = new ethers.BrowserProvider(window.ethereum, "any");
+  const add=(await provider.getSigner()).address;
 
-//     this.signer= await this.provider.getSigner();
-//   }
+  if (localStorage.signerAddress!=add)
+  {
+    localStorage.removeItem("orgid");
+    localStorage.removeItem("orgname");
+    localStorage.removeItem("orgaddresse");
+  }
 
-//   async doPayment(addr,ether){
-//     const tx = await this.signer.sendTransaction({
-//       to: addr,
-//       value: ethers.parseEther(ether)
-//     })
-//   }
+  localStorage.setItem("signerAddress",add);
+}
+setProvider();
 
-// }
+
+
+export class OrganizationFactory{
+
+  constructor(){}
+
+  async initialize() {
+    this.signer = await provider.getSigner();
+    this.organizationFactoryContract = new ethers.Contract(
+      ORGANIZATION_FACTORY_CONTRACT,
+      organizationFactoryABI.abi,
+      this.signer
+    );
+  }
+
+  async createOrganization(name){
+    await this.organizationFactoryContract.createOrganization(name.toString());
+  }
+  async getOrganizations(){
+    try{return await this.organizationFactoryContract.getOrganizations();}
+    catch (e){
+      alert(e);
+    }
+  }
+  async addOrganization(address){
+    await this.organizationFactoryContract.addOrganization(address);
+  }
+
+
+}
+
+export class Organization{
+
+  constructor(){}
+
+  async initialize(organisationAddress) {
+    this.signer = await provider.getSigner();
+    this.organizationContract = new ethers.Contract(
+      organisationAddress,
+      organizationABI.abi,
+      this.signer
+    );
+  }
+
+  async mintOrganizationToken(recieverAddress,status){
+    try{
+      await this.organizationContract.mint(recieverAddress,status);
+    }
+    catch (e){
+      alert(e)
+    }
+  }
+
+}
+
 
 export class DeviceFactory {
   constructor() {
@@ -49,12 +104,23 @@ export class DeviceFactory {
   }
 
   async getDevices() {
-    try {
-      return await this.deviceFactoryContract.getDevices();
-    } catch (error) {
-      console.error("Error getting devices:", error);
-      throw error;
+    const address=localStorage.orgaddresse;
+    console.log(address)
+    if (localStorage.orgaddresse){
+      
+      try {
+        return await this.deviceFactoryContract.getDevices(address);
+      } catch (error) {
+        alert(error);
+        throw error;
+      }
     }
+    else{
+      return [];
+    }
+    
+
+    
   }
 
   setDeviceListener = () => {
@@ -68,14 +134,14 @@ export class DeviceFactory {
   };
 
   addDevice = async (name) => {
-    debugger;
     try {
       await this.deviceFactoryContract.createDevice(
         name,
-        ACTION_FACCTORY_CONTRACT
+        ACTION_FACCTORY_CONTRACT,
+        localStorage.orgaddresse
       );
     } catch (error) {
-      console.error("Error adding device:", error);
+      alert(error);
       throw error;
     }
   };
@@ -186,8 +252,8 @@ export class Action {
     );
   }
 
-  async possibleActions(){
-    return await this.actionContract.possibleActions();
+  async possibleActionsAmount(){
+    return await this.actionContract.possibleActionsAmount();
   }
 
   async setPrice(price) {

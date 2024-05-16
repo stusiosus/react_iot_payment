@@ -21,14 +21,10 @@ export function DynamicCardsAction({ items }) {
   const actionFactory=new ActionFactory();
 
   async function handleCardClick(entry) {
-    await action.initialize(entry.ActionAddress);
-    console.log("possible executions"+await action.possibleActions())
     setCurrentAction(entry);
-    console.log(entry.id);
-    console.log(entry.price);
-    console.log(entry.deviceAddress);
-    console.log(entry.name);
-    console.log(entry.ActionAddress);
+    await action.initialize(entry.ActionAddress);
+    console.log("possible executions"+await action.possibleActionsAmount())
+  
     setOpen(true);
   }
   const handleOk = () => {
@@ -54,13 +50,17 @@ export function DynamicCardsAction({ items }) {
   return (
     <div>
       <Modal
-        title="Action Info "
+        title="Action Info"
         open={open}
         onOk={setPrice}
         confirmLoading={confirmLoading}
         onCancel={handleCancel}
         okText="set new Price "
       >
+        <br></br>
+        {currrentAction?currrentAction.ActionAddress:<></>}
+        <br></br>
+        <br></br>
         <Input
           placeholder="E.nter new Price"
           value={newPrice}
@@ -119,13 +119,7 @@ export function DynamicCardsDevice({ items }) {
 
   async function initializeContract(){
     await device.initialize(currentDevice.deviceAddress); 
-    setUserBalance(await device.getBalanceUser());
-    try{
-    setDeviceBalance(await device.getBalanceDevice());
-    }
-    catch{
-      setDeviceBalance("--only visable for Device Owner--")
-    }
+    
   }
 
 
@@ -138,7 +132,7 @@ export function DynamicCardsDevice({ items }) {
 
   function handleCardClick(entry) {
     setCurrentDevice(entry);
-    setOpen(true);
+    toActions(entry);
   }
   const handleOk = () => {
     setConfirmLoading(true);
@@ -156,8 +150,7 @@ export function DynamicCardsDevice({ items }) {
 
   const navigate = useNavigate();
 
-  function toActions() {
-    const entry=currentDevice;
+  function toActions(entry) {
     navigate("/actions", {
       state: {
         deviceAddress: entry.deviceAddress,
@@ -177,47 +170,7 @@ export function DynamicCardsDevice({ items }) {
 
   return (
     <div>
-      <Modal
-        //title="Device Info "
-        open={open}
-        onOk={handleOk}
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-        okText="Go to Actions Page"
-        width={1000}
-        height={600}
-      >
-        <h2>Subscribe to {currentDevice?currentDevice.name +" , "+currentDevice.deviceAddress:""} :</h2>
-        <br></br>
-        <Space.Compact
-          style={{
-            width: "100%",
-          }}
-        >
-          <Input
-            placeholder="Amount to deposit for subscription"
-            value={depositAmount}
-            onChange={(e) => setDepositAmount(e.target.value)}
-          />
-          <Button type="primary" onClick={sendFunds} justify="center">
-            Deposit {depositAmount} to {currentDevice?currentDevice.name:""}
-          </Button>
-        </Space.Compact>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <div>or scan wallet and send manually :</div>
-        <br></br>
-        <QRCode value={currentDevice?currentDevice.deviceAddress:""} />
-        <br></br>
-        <hr></hr>
-        <br></br>
-        <br></br>
-        <div>Your Balance : {userbalance}</div>
-        <br></br>
-        <div>Device Balance : {deviceBalance}</div>
-      </Modal>
+      
 
       {splititemsIntoGroups(items).map((group, index) => (
         <div>

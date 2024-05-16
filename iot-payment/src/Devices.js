@@ -32,7 +32,7 @@ export function Devices() {
             }
         };
         initializeDeviceFactory();
-    }, [alertMessage]);
+    }, [alertMessage,localStorage.orgaddresse]);
 
     const showModal = () => {
         setOpen(true);

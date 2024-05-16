@@ -3,6 +3,7 @@ pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Action.sol";
 import "./Balance.sol";
+import "./Organization.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract ActionFactory is Ownable {
@@ -15,28 +16,31 @@ contract ActionFactory is Ownable {
         uint256 price;
         address deviceAddress;
         address deviceOwner;
+        address organisationAddress;
     }
-    constructor()Ownable(msg.sender){}
 
     mapping (uint256 => ActionInfo ) public Actions;
     uint256 actionCounter=1;
 
     Balance private balance;
 
-    event ActionCreated(address indexed action, uint256 indexed id, string name, string unit, uint256 pricePerUnit, address deviceAddress);
+    constructor() Ownable(msg.sender){}
 
-    function createAction(string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress,address _deviceOwner) public  returns(address){
+    event ActionCreated(address indexed action, uint256 indexed id, string name, string unit, uint256 pricePerUnit, address deviceAddress,address _organisationAddress);
+
+    function createAction(string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress,address _deviceOwner,address _organisationAddress) public  returns(address){
 
         Action newAction = new Action(actionCounter, _name, _unit, _pricePerUnit, _deviceAddress, payable(address(balance)));
-        emit ActionCreated(address(newAction), actionCounter, _name, _unit, _pricePerUnit, _deviceAddress);
+        emit ActionCreated(address(newAction), actionCounter, _name, _unit, _pricePerUnit,_deviceAddress ,_organisationAddress);
 
-        Actions[actionCounter]= ActionInfo(actionCounter,address(newAction), _name, _unit, _pricePerUnit, _deviceAddress,_deviceOwner);
+
+        Actions[actionCounter]= ActionInfo(actionCounter,address(newAction), _name, _unit, _pricePerUnit, _deviceAddress,_deviceOwner,_organisationAddress);
         actionCounter++;
         return address(newAction);
     }
 
     function setBalanceContract(address payable _balanceAddress)external onlyOwner(){
-        balance = Balance(_balanceAddress);
+        balance = Balance(_balanceAddress); 
     }
 
 
@@ -54,8 +58,8 @@ contract ActionFactory is Ownable {
 
      function updateActionPrice(uint256 _actionId, uint256 _newPrice) public {
         require(Actions[_actionId].ActionAddress != address(0), "Action does not exist");
-        require(msg.sender == Actions[_actionId].deviceOwner, "Only device owner can update action price");
-        
+        require(Organization(Actions[_actionId].organisationAddress).isAdmin(msg.sender)," no AdminNFT -> not allowed to create an Device");
+
         Action action = Action(Actions[_actionId].ActionAddress);
         action.setPrice(_newPrice);
         Actions[_actionId].price = _newPrice;

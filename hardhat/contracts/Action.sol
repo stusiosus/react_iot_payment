@@ -22,12 +22,11 @@ contract Action is Ownable{
 
 
     modifier checkEnoughtBalance(){
-        require(balance.getBalance(msg.sender) >= pricePerUnit,"Insufficient Balacne");
+        require(balance.getBalance(msg.sender) >= pricePerUnit,"Insufficient Balance");
         _;
     }
 
     constructor(uint256 _id,string memory _name,string memory _unit,uint256 _pricePerUnit, address payable _deviceAddress, address payable _balanceAddress) Ownable(msg.sender){
-        //@dev: check if the Contract is only called by device Contract -> replace the address by the Factory contract address
         require(msg.sender==address(msg.sender));
         id=_id;
         name=_name;
@@ -46,7 +45,7 @@ contract Action is Ownable{
     function payAction(uint256 _amount)external checkEnoughtBalance(){
         actionFactory.Balancetransfer(id,msg.sender,device.owner(),(_amount*pricePerUnit));
     }
-    function possibleActions()external view returns(uint256){
+    function possibleActionsAmount()external view returns(uint256){
         return (balance.getBalance(msg.sender)/pricePerUnit);
     }
 

@@ -1,46 +1,62 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC721Burnable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import {ERC721, ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
-contract Organization is ERC721 {
-    uint256 public constant ADMIN_ROLE = 1;
-    uint256 public constant USER_ROLE = 2;
+contract Organization is ERC721, ERC721Enumerable, ERC721Burnable {
+    enum Status { Admin, User }
+    uint256 tokenId = 1;
 
-    struct Device {
-        string name;
+    // Mapping to store the status of each token
+    mapping(uint256 => Status) private tokenStatus;
+
+     modifier IsAdmin{
+        require(isAdmin(msg.sender),"no NFT -> not authorized");
+        _;
     }
 
-    struct Organization {
-        address admin;
-        mapping(address => uint256) userRoles; // Benutzeradressen zu Rollen (ADMIN_ROLE oder USER_ROLE)
-        mapping(uint256 => Device) devices; // Geräte-ID zu Gerätendetails
+    constructor(string memory name, string memory symbol,address _creator) ERC721(name, symbol) {
+        _safeMint(_creator, tokenId);
+        tokenStatus[tokenId] = Status.Admin; 
     }
 
-    mapping(uint256 => Organization) public organizations; // Organisationen durch NFT-Token-ID
-
-    constructor() ERC721("DeviceOrganization", "DO") {}
-
-    function createOrganization() external {
-        uint256 tokenId = totalSupply() + 1;
-        _mint(msg.sender, tokenId);
-        organizations[tokenId].admin = msg.sender;
-        _grantRole(tokenId, msg.sender, ADMIN_ROLE);
+    function isAdmin(address owner) public  view returns (bool) {
+        uint256 balance=balanceOf(owner);
+        for(uint256 i=0;i<balance;i++){
+            uint256 Id=tokenOfOwnerByIndex(owner, i);
+            if (tokenStatus[Id] == Status.Admin) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    function grantUserRole(uint256 tokenId, address user, uint256 role) external {
-        require(role == ADMIN_ROLE || role == USER_ROLE, "Invalid role");
-        require(ownerOf(tokenId) == msg.sender, "Only organization admin can grant roles");
-        organizations[tokenId].userRoles[user] = role;
+  
+    function mint(address to, Status status) external  IsAdmin{
+     
+        tokenId = tokenId + 1;
+        _safeMint(to, tokenId);
+        tokenStatus[tokenId] = status; 
+     
     }
 
-    function createDevice(uint256 tokenId, uint256 deviceId, string memory deviceName) external {
-        require(organizations[tokenId].userRoles[msg.sender] == ADMIN_ROLE, "Only admins can create devices");
-        organizations[tokenId].devices[deviceId] = Device(deviceName);
+    function supportsInterface(bytes4 interfaceId) public view override(ERC721, ERC721Enumerable) returns (bool) {
+      return super.supportsInterface(interfaceId);
+    }
+    
+    function _update(
+      address to,
+      uint256 tokenId,
+      address auth
+    ) internal override(ERC721, ERC721Enumerable) returns (address) {
+      return super._update(to, tokenId, auth);
     }
 
-    function getDevice(uint256 tokenId, uint256 deviceId) external view returns (string memory) {
-        return organizations[tokenId].devices[deviceId].name;
+    function _increaseBalance(address account, uint128 value) internal override(ERC721, ERC721Enumerable) {
+      super._increaseBalance(account, value);
     }
 
+  
 }
