@@ -58,15 +58,19 @@ export function Devices() {
             console.error('Error adding device:', error);
         }
     };
+    const isAdmin = localStorage.getItem('isAdmin') === 'true'; 
 
     return (
         <div>
             {alertMessage ? <><Alert message={deviceName+ " was created"} type="success" closable showIcon /> <br></br> </>: null}
             
             <div style={{display:"flex",justifyContent:"center",alignItems: 'center',padding: '80px',}}>
-            <Button onClick={showModal} block>
+            
+            {isAdmin?<Button onClick={showModal} block>
                 Create New Device
-            </Button>
+            </Button>:
+            <></>}
+            
             </div>
             <Modal
                 title="Create New Device"

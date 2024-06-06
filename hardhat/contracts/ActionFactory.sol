@@ -10,7 +10,7 @@ contract ActionFactory is Ownable {
 
     struct ActionInfo{
         uint256 id;
-        address ActionAddress;
+        address payable ActionAddress;
         string name;
         string unit;
         uint256 price;
@@ -27,6 +27,7 @@ contract ActionFactory is Ownable {
     constructor() Ownable(msg.sender){}
 
     event ActionCreated(address indexed action, uint256 indexed id, string name, string unit, uint256 pricePerUnit, address deviceAddress,address _organisationAddress);
+    event PayedAction(address  actionAddress,uint256  id,string  name,uint256 amount);
 
     function createAction(string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress,address _deviceOwner,address _organisationAddress) public  returns(address){
 
@@ -34,7 +35,7 @@ contract ActionFactory is Ownable {
         emit ActionCreated(address(newAction), actionCounter, _name, _unit, _pricePerUnit,_deviceAddress ,_organisationAddress);
 
 
-        Actions[actionCounter]= ActionInfo(actionCounter,address(newAction), _name, _unit, _pricePerUnit, _deviceAddress,_deviceOwner,_organisationAddress);
+        Actions[actionCounter]= ActionInfo(actionCounter,payable(address(newAction)), _name, _unit, _pricePerUnit, _deviceAddress,_deviceOwner,_organisationAddress);
         actionCounter++;
         return address(newAction);
     }
@@ -66,8 +67,16 @@ contract ActionFactory is Ownable {
     }
 
 
-    function Balancetransfer(uint256 _id,address _from, address _to, uint256 _amount) external{
+    function Balancetransfer(uint256 _id,address _from, address _to, uint256 _amount) external returns (bool){
         require(msg.sender==Actions[_id].ActionAddress, "You are not allowed to call this function");
-        balance.transferBalance(_from, _to, _amount);
+        bool success=balance.transferBalance(_from, _to, _amount);
+        require(success,"something with BalanceTrasfer in ActionFactory went wrong");
+        return success;
     }
+    
+    function logPayedAction(address _actionAddress, uint256 _id, string memory _name, uint256 _amount) external {
+        require(msg.sender == _actionAddress, "Only the action contract can call this function");
+        emit PayedAction(_actionAddress, _id, _name, _amount);
+    }
+
 }

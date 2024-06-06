@@ -29,11 +29,13 @@ contract Balance is Ownable{
     function getBalance(address account) external view returns (uint256) {
         return balances[account];
     }
-    function transferBalance(address _from, address _to, uint256 _amount) external {
+    function transferBalance(address _from, address _to, uint256 _amount) external returns(bool) {
         require(_amount > 0, "Amount must be greater than zero");
         require(balances[_from] >= _amount, "Insufficient balance");
         require(msg.sender==actionFactory, "you are not authorized to transfer the Balance");
         balances[_from]-=_amount;
         balances[_to]+=_amount;
+
+        return true;
     }
 }

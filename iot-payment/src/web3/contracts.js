@@ -8,10 +8,17 @@ const balanceABI = require("../Abi/Balance.json");
 const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
 const organizationABI=require("../Abi/Organization.json");
 
-const ORGANIZATION_FACTORY_CONTRACT = "0x333bF3FcBCEa1C25Bc6E6740F0b9fcbDA57405D8";
-const DEVICE_FACTORY_CONTRACT = "0x1A1Ce36B60d8A224D7256A8ac994bC5c7352d075";
-const ACTION_FACCTORY_CONTRACT = "0x1267a75585A235Aa85701523F98D910957420e81";
-const BALANCE_CONTRACT = "0xECCe3E4Bd667fdb13622173b406a80e605AB8C3E";
+const ORGANIZATION_FACTORY_CONTRACT = "0xF95D936a770BA6A26aF3d01ced6C354D7B5a6465";
+const DEVICE_FACTORY_CONTRACT = "0x2AAc0823376bbb4b92Ef4e500F8A7e5A16bcFcca";
+const ACTION_FACCTORY_CONTRACT = "0xCbF07AB9985b073FcBe2Fee6E6e1801a7Ed4d014";
+const BALANCE_CONTRACT = "0x5354BEb3B48fc6f09F1d6b0D6f91D86a1EdDd803";
+
+// const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+// const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+// const BALANCE_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+
+
 
 
 
@@ -62,6 +69,7 @@ export class OrganizationFactory{
   }
 
 
+
 }
 
 export class Organization{
@@ -84,6 +92,9 @@ export class Organization{
     catch (e){
       alert(e)
     }
+  }
+  async isAdmin(){
+    return this.organizationContract.isAdmin(this.signer.address);
   }
 
 }
@@ -191,7 +202,7 @@ export class Device {
     try {
       const tx = await this.signer.sendTransaction({
         to: this.deviceAddress,
-        value: ethers.parseEther(amount),
+        value: amount,
       });
     } catch (e) {
       alert(e);
@@ -238,18 +249,30 @@ export class ActionFactory {
 }
 
 export class Action {
-  // constructor() {
-  //   this.initialize();
-  // }
 
   async initialize(address) {
     this.signer = await provider.getSigner();
+    this.address=address;
 
     this.actionContract = new ethers.Contract(
       address,
       actionAbi.abi,
       this.signer
     );
+  }
+
+  async payActionInstant(amount){
+    try {
+      const tx = await this.signer.sendTransaction({
+        to: this.address,
+        value:(amount).toString(),
+      });
+    } catch (e) {
+      alert(e);
+    }
+  }
+  async payAction(amount){
+   await this.actionContract.payAction(amount);
   }
 
   async possibleActionsAmount(){
@@ -272,14 +295,13 @@ export class Balance {
   }
 
   async getBalance() {
-
     return (await this.balanceContract.getBalance(this.signer)).toString();
   }
   async deposit(amount) {
     try {
       const tx = await this.signer.sendTransaction({
         to: BALANCE_CONTRACT,
-        value: ethers.parseEther(amount),
+        value: amount,
       });
     } catch (e) {
       alert(e);

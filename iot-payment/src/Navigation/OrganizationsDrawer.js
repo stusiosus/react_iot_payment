@@ -33,20 +33,29 @@ export default function OrganizationsDrawer({
     await organizationFactory.initialize();
     await organizationFactory.addOrganization(addOrganisationAddress);
   };
-  const selectOrganisation = (org) => {
+  async function isAdmin(org){
+    await organizationContract.initialize(org.NFTAddress);
+    return await organizationContract.isAdmin();
+  }
+  const selectOrganisation = async (org) => {
+    setOrganization(org);
     localStorage.setItem("orgid", org.id);
     localStorage.setItem("orgname", org.name);
     localStorage.setItem("orgaddresse", org.NFTAddress);
     localStorage.setItem("orgcreator", org.creator);
+    localStorage.setItem("isAdmin", await isAdmin(org));
+
     setOpen(false);
     window.location.reload();
   };
 
-  function showModal(organisation) {
+  async function showModal(organisation) {
+
     setOrganization(organisation);
     setOpenModal(true);
   }
-
+  
+ 
   const handleOk = async () => {
     setOpenModal(false);
   };
@@ -146,13 +155,13 @@ export default function OrganizationsDrawer({
             <List.Item
               actions={[
                 <a
-                  key={`${organisation.id}-edit`}
+                  key={`${organisation.id}-select`}
                   onClick={() => selectOrganisation(organisation)}
                 >
                   select
                 </a>,
                 <a
-                  key={`${organisation.id}-more`}
+                  key={`${organisation.id}-edit`}
                   onClick={() => showModal(organisation)}
                 >
                   edit

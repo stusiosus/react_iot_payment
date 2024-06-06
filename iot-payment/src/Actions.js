@@ -68,12 +68,17 @@ export function Actions() {
         }
     };
 
+    const isAdmin = localStorage.getItem('isAdmin') === 'true'; 
+
+
     return (
         <div>
             {alertMessage ? <><Alert message={actionName+ " was created"} type="success"  closable showIcon /> <br></br> </>: null}
-            <Button type="primary" onClick={showModal}>
+            {isAdmin?<Button type="primary" onClick={showModal}>
                 Create New Action
-            </Button>
+            </Button>:
+            <></>}
+            
             <Modal
                 title="Create New Action"
                 visible={open}

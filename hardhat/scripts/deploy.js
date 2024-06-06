@@ -3,8 +3,9 @@ const { ethers } = require("hardhat");
 var fs = require("fs");
 
 
-async function main() {
 
+
+async function main() {
 
     const OrgnizationFactory=await ethers.getContractFactory("OrganizationFactory");
     const orgnizationFactory=await OrgnizationFactory.deploy();
@@ -23,19 +24,8 @@ async function main() {
     const actionFactory = await ActionFactory.deploy();
     await actionFactory.deployed();
     console.log("ActionFactory contract deployed to:", actionFactory.address);
-  
-    // // Deploy Device contract
-    // const Device = await ethers.getContractFactory("Device");
-    // const device = await Device.deploy(0,"Pepper",actionFactory.address,"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
-    // await device.deployed();
-    // console.log("Device contract deployed to:", device.address);
-  
 
-    // // Deploy Action contract
-    // const Action = await ethers.getContractFactory("Action");
-    // const action = await Action.deploy(0,"saySomething","word",1,device.address,actionFactory.address);
-    // await action.deployed();
-    // console.log("Action contract deployed to:", action.address);
+
 
     const Balance = await ethers.getContractFactory("Balance");
     const balance = await Balance.deploy(actionFactory.address);
@@ -46,7 +36,37 @@ async function main() {
   await actionFactory.setBalanceContract(balance.address);
 
 
+    /// for testing purpose
+  // create device with action 
+  // const organisationName="studio6";
+  // await orgnizationFactory.createOrganization(organisationName);
 
+
+
+  // const DeviceName="pepper";
+  // const organizations=await  orgnizationFactory.getOrganizations()
+
+  // const OrganiZation=await ethers.getContractFactory("Organization");
+  // const organization=await OrganiZation.attach(organizations[0].NFTAddress)
+
+  // const [owner, addr1,addr2] = await ethers.getSigners();
+  // console.log(addr1.address)
+  // await organization.mint(addr1.address,0)
+  // await organization.mint(addr2.address,1)
+
+
+  // await deviceFactory.createDevice(DeviceName,actionFactory.address,organizations[0].NFTAddress)
+  
+  // const devices=await deviceFactory.getDevices(organizations[0].NFTAddress);
+  // const Device= await ethers.getContractFactory("Device");
+  // const device=  Device.attach(devices[0].deviceAddress)
+
+  // await device.addAction("make elephant", "per action", 2)
+
+  // const actions=await actionFactory.getActions(devices[0].deviceAddress);
+
+
+  // console.log("The Device: "+DeviceName+ " with the Address : "+ devices[0].deviceAddress+ "  And the Action with Address: "+actions[0].ActionAddress+ "  was ccreatet in Organisation: "+organizations[0].NFTAddress);
 
   
   // const data =

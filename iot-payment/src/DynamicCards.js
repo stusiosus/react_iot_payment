@@ -10,7 +10,6 @@ import { accessListify } from "ethers";
 
 
 
-
 export function DynamicCardsAction({ items }) {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -23,17 +22,13 @@ export function DynamicCardsAction({ items }) {
   async function handleCardClick(entry) {
     setCurrentAction(entry);
     await action.initialize(entry.ActionAddress);
-    console.log("possible executions"+await action.possibleActionsAmount())
-  
     setOpen(true);
   }
   const handleOk = () => {
-    setConfirmLoading(true);
 
-    setTimeout(() => {
-      setOpen(false);
-      setConfirmLoading(false);
-    }, 500);
+    setOpen(false);
+  
+   
   };
 
   const handleCancel = () => {
@@ -45,30 +40,64 @@ export function DynamicCardsAction({ items }) {
     await actionFactory.initialize();
     await actionFactory.updateActionPrice(currrentAction.id,newPrice);
   }
+  const payAction=async()=>{
+
+    await action.initialize(currrentAction.ActionAddress);
+    await action.payActionInstant(currrentAction.price);
+  }
+
+  const payActionWithBalance=async ()=>{
+    await action.initialize(currrentAction.ActionAddress);
+    await action.payAction(1);
+  }
+
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
 
 
   return (
     <div>
-      <Modal
-        title="Action Info"
-        open={open}
-        onOk={setPrice}
-        confirmLoading={confirmLoading}
-        onCancel={handleCancel}
-        okText="set new Price "
+    {currrentAction?
+    <Modal
+      title={currrentAction.name}
+      open={open}
+      onOk={handleOk}
+      onCancel={handleCancel}
       >
-        <br></br>
-        {currrentAction?currrentAction.ActionAddress:<></>}
-        <br></br>
-        <br></br>
-        <Input
-          placeholder="E.nter new Price"
-          value={newPrice}
-          onChange={(e) => setNewPrice(e.target.value)}
-        />
-        
-      </Modal>
-
+          {currrentAction ? currrentAction.ActionAddress : <></>}
+          <br />
+          <br />
+          {isAdmin?
+          <div>
+          <Input
+            placeholder="Enter new Price"
+            value={newPrice}
+            onChange={(e) => setNewPrice(e.target.value)}
+          />
+          <Button onClick={setPrice}>set New Price</Button>
+          </div>
+          :
+        <></>}
+          
+      <br></br>
+      <br></br>
+      <hr></hr>
+      
+      <br></br>
+      <div></div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+     
+     <QRCode value={currrentAction? currrentAction.ActionAddress : ""} />
+            </div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px' }}>
+        <Button onClick={payAction}>Pay Action with Wallet</Button>
+        <Button onClick={payActionWithBalance}>Pay Action with Balance</Button>
+      </div>
+      
+    <br></br>
+    </Modal>
+:<></>}
+          
       {splititemsIntoGroups(items).map((group, index) => (
         <div>
           <Row key={index} gutter={16} justify="center">

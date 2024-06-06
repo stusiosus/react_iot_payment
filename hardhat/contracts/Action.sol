@@ -20,11 +20,16 @@ contract Action is Ownable{
     ActionFactory private actionFactory;
 
 
-
     modifier checkEnoughtBalance(){
         require(balance.getBalance(msg.sender) >= pricePerUnit,"Insufficient Balance");
         _;
     }
+    receive()external payable{
+        require(msg.value>= pricePerUnit);
+        (bool success, ) = device.owner().call{value: msg.value}("");
+        require(success, "Transfer failed");
+        actionFactory.logPayedAction(address(this), id, name, msg.value/pricePerUnit);   
+         }
 
     constructor(uint256 _id,string memory _name,string memory _unit,uint256 _pricePerUnit, address payable _deviceAddress, address payable _balanceAddress) Ownable(msg.sender){
         require(msg.sender==address(msg.sender));
@@ -42,13 +47,14 @@ contract Action is Ownable{
         pricePerUnit=_price;
     }
 
-    function payAction(uint256 _amount)external checkEnoughtBalance(){
-        actionFactory.Balancetransfer(id,msg.sender,device.owner(),(_amount*pricePerUnit));
+    function payAction(uint256 _amount)external checkEnoughtBalance(){        
+        bool success =actionFactory.Balancetransfer(id,msg.sender,device.owner(),(_amount*pricePerUnit));
+        require(success, "Transfer failed");
+        actionFactory.logPayedAction(address(this), id, name, _amount);
     }
-    function possibleActionsAmount()external view returns(uint256){
+    function possibleActionsAmount()public view returns(uint256){
         return (balance.getBalance(msg.sender)/pricePerUnit);
     }
-
 
 
 }
