@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Drawer, Input, Button, List, Modal,Radio ,RadioChangeEvent} from "antd";
-import { OrganizationFactory,Organization } from "../web3/contracts";
+import { OrganizationFactory,Organization,Voting } from "../web3/contracts";
 
 export default function OrganizationsDrawer({
   placement,
@@ -18,7 +18,7 @@ export default function OrganizationsDrawer({
 
   const organizationFactory = new OrganizationFactory();
   const organizationContract = new Organization();
-
+  const voting= new Voting()
 
   async function loadOrganizations() {
     await organizationFactory.initialize();
@@ -73,7 +73,12 @@ export default function OrganizationsDrawer({
     await organizationContract.initialize(organization.NFTAddress);
     await organizationContract.mintOrganizationToken(revieverAddress,mintAdmin)
   }
+  const listProposal= async ()=>{
 
+    await voting.initialize();
+    console.log(await voting.getProposalsByOrganization(localStorage.orgaddresse));
+  }
+  listProposal()
 
   useEffect(() => {
     loadOrganizations();
@@ -185,6 +190,8 @@ export default function OrganizationsDrawer({
         <Button type="primary" shape="round" onClick={addOrganization}>
           add an existing Organization to your List
         </Button>
+
+        <div>{}</div>
       </Drawer>
     </>
   );

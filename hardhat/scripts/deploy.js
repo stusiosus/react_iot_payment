@@ -36,6 +36,14 @@ async function main() {
   await actionFactory.setBalanceContract(balance.address);
 
 
+     // Deploy Proposal contract
+     const Proposal = await ethers.getContractFactory("Voting");
+     const proposal = await Proposal.deploy();
+     await proposal.deployed();
+     console.log("Voting contract deployed to:", proposal.address);
+ 
+
+
     /// for testing purpose
   // create device with action 
   // const organisationName="studio6";

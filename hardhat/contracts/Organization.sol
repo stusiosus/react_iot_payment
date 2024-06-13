@@ -58,5 +58,9 @@ contract Organization is ERC721, ERC721Enumerable, ERC721Burnable {
       super._increaseBalance(account, value);
     }
 
+
+    function getTotalNFTs() public view returns (uint256) {
+        return totalSupply();
+    }
   
 }

@@ -5,6 +5,7 @@ import "./Device.sol";
 import "hardhat/console.sol";
 import"./ActionFactory.sol";
 import "./Balance.sol";
+import "hardhat/console.sol";
 
 contract Action is Ownable{
 
@@ -25,11 +26,13 @@ contract Action is Ownable{
         _;
     }
     receive()external payable{
+        console.log("Called recieve function with sendet amount:",msg.value);
         require(msg.value>= pricePerUnit);
         (bool success, ) = device.owner().call{value: msg.value}("");
         require(success, "Transfer failed");
         actionFactory.logPayedAction(address(this), id, name, msg.value/pricePerUnit);   
-         }
+     
+        }
 
     constructor(uint256 _id,string memory _name,string memory _unit,uint256 _pricePerUnit, address payable _deviceAddress, address payable _balanceAddress) Ownable(msg.sender){
         require(msg.sender==address(msg.sender));
@@ -54,6 +57,10 @@ contract Action is Ownable{
     }
     function possibleActionsAmount()public view returns(uint256){
         return (balance.getBalance(msg.sender)/pricePerUnit);
+    }
+
+    function getPricePerUnit() public view returns (uint256) {
+        return pricePerUnit;
     }
 
 

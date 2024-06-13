@@ -23,12 +23,14 @@ contract Device is Ownable{
 
  
    
-    function addAction(string memory _name, string memory _unit, uint32 _pricePerUnit) public  {
+    function addAction(string memory _name, string memory _unit, uint32 _pricePerUnit) public returns (address) {
 
         require(organization.isAdmin(msg.sender)," no AdminNFT -> not allowed to create an Device");
        
         address actionAddress = actionFactory.createAction(_name, _unit, _pricePerUnit,payable(address(this)),msg.sender,address(organization));
    
         actionToDevice[id] = actionAddress;
+
+        return actionAddress;
     }
 }

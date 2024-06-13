@@ -5,7 +5,7 @@ This project demonstrates a basic Hardhat use case. It comes with a sample contr
 Try running some of the following tasks:
 
 ```shell
-npy hardhat compile
+npx hardhat clean
 npx hardhat node
 npx hardhat run --network localhost scripts/deploy.js
 

@@ -7,17 +7,19 @@ const actionAbi = require("../Abi/Action.json");
 const balanceABI = require("../Abi/Balance.json");
 const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
 const organizationABI=require("../Abi/Organization.json");
+const votingABI=require("../Abi/Voting.json");
 
-const ORGANIZATION_FACTORY_CONTRACT = "0xF95D936a770BA6A26aF3d01ced6C354D7B5a6465";
-const DEVICE_FACTORY_CONTRACT = "0x2AAc0823376bbb4b92Ef4e500F8A7e5A16bcFcca";
-const ACTION_FACCTORY_CONTRACT = "0xCbF07AB9985b073FcBe2Fee6E6e1801a7Ed4d014";
-const BALANCE_CONTRACT = "0x5354BEb3B48fc6f09F1d6b0D6f91D86a1EdDd803";
+// const ORGANIZATION_FACTORY_CONTRACT = "0xF95D936a770BA6A26aF3d01ced6C354D7B5a6465";
+// const DEVICE_FACTORY_CONTRACT = "0x2AAc0823376bbb4b92Ef4e500F8A7e5A16bcFcca";
+// const ACTION_FACCTORY_CONTRACT = "0xCbF07AB9985b073FcBe2Fee6E6e1801a7Ed4d014";
+// const BALANCE_CONTRACT = "0x5354BEb3B48fc6f09F1d6b0D6f91D86a1EdDd803";
 
-// const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-// const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-// const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-// const BALANCE_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 
+const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+const BALANCE_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const VOTING_CONTRACT="0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
 
 
 
@@ -106,6 +108,7 @@ export class DeviceFactory {
   }
 
   async initialize() {
+    debugger;
     this.signer = await provider.getSigner();
     this.deviceFactoryContract = new ethers.Contract(
       DEVICE_FACTORY_CONTRACT,
@@ -116,7 +119,7 @@ export class DeviceFactory {
 
   async getDevices() {
     const address=localStorage.orgaddresse;
-    console.log(address)
+
     if (localStorage.orgaddresse){
       
       try {
@@ -314,5 +317,31 @@ export class Balance {
     } catch (e) {
       alert(e);
     }
+  }
+}
+
+
+export class Voting {
+  async initialize() {
+    this.signer = await provider.getSigner();
+    this.votingContract = new ethers.Contract(
+      VOTING_CONTRACT,
+      votingABI.abi,
+      this.signer
+    );
+  }
+
+  async createProposal(description,organization,action,duration) {
+    await this.votingContract.createProposal(description,organization,action,duration)
+  }
+  async getProposalsByOrganization(organization) {
+   return  await this.votingContract.getProposalsByOrganization(organization);  
+  }
+  async vote(value) {
+   
+  }
+
+  async endVote(votingId){
+
   }
 }
