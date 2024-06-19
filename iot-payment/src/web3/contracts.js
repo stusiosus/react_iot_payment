@@ -7,7 +7,8 @@ const actionAbi = require("../Abi/Action.json");
 const balanceABI = require("../Abi/Balance.json");
 const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
 const organizationABI=require("../Abi/Organization.json");
-const votingABI=require("../Abi/Voting.json");
+const fundraisingABI=require("../Abi/FundRaising.json");
+const campaignABI=require("../Abi/Campaign.json");
 
 // const ORGANIZATION_FACTORY_CONTRACT = "0xF95D936a770BA6A26aF3d01ced6C354D7B5a6465";
 // const DEVICE_FACTORY_CONTRACT = "0x2AAc0823376bbb4b92Ef4e500F8A7e5A16bcFcca";
@@ -19,7 +20,8 @@ const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa
 const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 const BALANCE_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const VOTING_CONTRACT="0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+const FUNDRAISING_CONTRACT="0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+const  CAMPAIGN_CONTRACT="";
 
 
 
@@ -108,7 +110,6 @@ export class DeviceFactory {
   }
 
   async initialize() {
-    debugger;
     this.signer = await provider.getSigner();
     this.deviceFactoryContract = new ethers.Contract(
       DEVICE_FACTORY_CONTRACT,
@@ -122,30 +123,28 @@ export class DeviceFactory {
 
     if (localStorage.orgaddresse){
       
-      try {
-        return await this.deviceFactoryContract.getDevices(address);
-      } catch (error) {
-        alert(error);
-        throw error;
-      }
+      return await this.deviceFactoryContract.getDevices(address);
     }
     else{
       return [];
     }
-    
-
-    
   }
 
-  setDeviceListener = () => {
-    this.deviceFactoryContract
-      .on("DeviceCreated", (action, id, name, factoryaddress) => {
-        console.log("Device created:", name);
-      })
-      .catch((error) => {
-        console.error("Error in event listener:", error);
-      });
-  };
+  setDeviceListenerCreate(callback) {
+    this.deviceFactoryContract.on("DeviceCreated", (action, id, name, factoryaddress) => {
+      callback();
+    });
+  }
+  setDeviceListenerUpdate(callback) {
+    this.deviceFactoryContract.on("DeviceUpdated", ( id,newName) => {
+      callback();
+    });
+  }
+  setDeviceListenerDelete(callback) {
+    this.deviceFactoryContract.on("DeviceDeleted", ( id) => {
+      callback();
+    });
+  }
 
   addDevice = async (name) => {
     try {
@@ -159,6 +158,13 @@ export class DeviceFactory {
       throw error;
     }
   };
+  async deleteDevice(deviceId){
+    await this.deviceFactoryContract.deleteDevice(deviceId);
+  }
+  async updateDeviceName(deviceId,newName){
+    await this.deviceFactoryContract.updateDeviceName(deviceId,newName);
+  }
+  
 }
 
 export class Device {
@@ -233,7 +239,7 @@ export class ActionFactory {
       deviceAddress
     );
     var cleanedResults = [];
-    console.log(rawActions);
+  
 
     for (var i in rawActions) {
       if (rawActions[i].deviceAddress.toString() == deviceAddress.toString()) {
@@ -248,6 +254,44 @@ export class ActionFactory {
       actionId,
       Number(newPrice)
     );
+  }
+  async updateActionName(actionId, newname) {
+    await this.actionFactoryContract.updateActionName(
+      actionId,
+     newname
+    );
+  }
+  async updateActionUnit(actionId, newUnit) {
+    await this.actionFactoryContract.updateActionUnit(
+      actionId,
+      newUnit
+    );
+  }
+  async deleteAction(actionId){
+    await this.actionFactoryContract.deleteAction(
+      actionId
+    );
+  }
+  setActionListenerCreate(callback) {
+    this.actionFactoryContract.on("ActionCreated", (action, id, name, unit,deviceAddress,_organisationAddress) => {
+      callback();
+    });
+  }
+  setActionListenerDelete(callback) {
+    this.actionFactoryContract.on("ActionDeleted", (id) => {
+      callback();
+    });
+  }
+  setActionListenerUpdate(callback) {
+    this.actionFactoryContract.on("ActionUpdated", (id,newName,newUnit,newPrice) => {
+      callback();
+    });
+  }
+
+  setActionListenerPayed(callback) {
+    this.actionFactoryContract.on("PayedAction", (actionaddress,id,name,amount) => {
+      callback();
+    });
   }
 }
 
@@ -321,27 +365,62 @@ export class Balance {
 }
 
 
-export class Voting {
+export class FundRaising {
   async initialize() {
     this.signer = await provider.getSigner();
-    this.votingContract = new ethers.Contract(
-      VOTING_CONTRACT,
-      votingABI.abi,
+    this.FundRaisingContract = new ethers.Contract(
+      FUNDRAISING_CONTRACT,
+      fundraisingABI.abi,
       this.signer
     );
   }
 
-  async createProposal(description,organization,action,duration) {
-    await this.votingContract.createProposal(description,organization,action,duration)
+  async createCampaign(description,organization,action,duration,amount) {
+    await this.FundRaisingContract.createCampaign(description,organization,action,duration,amount)
   }
-  async getProposalsByOrganization(organization) {
-   return  await this.votingContract.getProposalsByOrganization(organization);  
+  async getCampaignsByOrganization(organization) {
+   return  await this.FundRaisingContract.getCampaignsByOrganization(organization);  
   }
-  async vote(value) {
-   
+ 
+  setCampaignListenerCreate(callback) {
+    this.actionFactoryContract.on("CampaignCreated", (campaignId,campaignaddress,description,organizationAddress,duration,targetAmount
+    ) => {
+      callback();
+    });
   }
 
-  async endVote(votingId){
+}
 
+export class Campaign {
+  async initialize(campaignAddress) {
+    this.signer = await provider.getSigner();
+    this.CampaignContract = new ethers.Contract(
+      campaignAddress,
+      campaignABI.abi,
+      this.signer
+    );
   }
+
+ 
+  async sendFunds(amount) {
+    
+    try {
+      const tx = await this.signer.sendTransaction({
+        to: this.CampaignContract,
+        value: amount,
+      });
+    } catch (e) {
+      alert(e);
+    }
+  };
+  async endCampaign(){
+    await this.CampaignContract.endCampaign();
+  };
+
+  addContributedListener(callback) {
+    this.CampaignContract.on("Contributed", (contributor, amount) => {
+      callback();
+    });
+  }
+
 }

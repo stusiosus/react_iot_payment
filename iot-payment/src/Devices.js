@@ -1,38 +1,52 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Button, Modal, Input, Alert } from 'antd';
 import { DeviceFactory } from './web3/contracts';
-import React from 'react';
-import { Button, Modal,Input ,Alert} from 'antd';
-import {DynamicCardsDevice} from "./DynamicCards";
-
+import { DynamicCardsDevice } from "./DynamicCardsDevice";
 
 export function Devices() {
     const [devices, setDevices] = useState([]);
     const [deviceName, setDeviceName] = useState('');
     const [alertMessage, setAlertMessage] = useState(null);
+    const [showAlertMessage,setShowAlterMessage]=useState(false);
     const [deviceInstance, setDeviceInstance] = useState(null);
-    
     const [initialized, setInitialized] = useState(false);
     const [open, setOpen] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
     const [modalText, setModalText] = useState('Content of the modal');
-    const [deviceBalance,setDeviceBalance]=useState(0);
+    const [showInfoScreen, setShowInfoScreen] = useState(false);
+
+    const deviceFactory = new DeviceFactory();
+
+    const getDevices = async () => {
+        try {
+            const fetchedDevices = await deviceFactory.getDevices();
+            setDevices(fetchedDevices);
+        } catch (e) {
+            if (e.message && e.message.includes("no data present")) {
+                setShowInfoScreen(true);
+            }
+        }
+    };
+
+    const eventcallback = async () => {
+        getDevices();
+        setShowAlterMessage(true);
+    };
+
+    const initializeDeviceFactory = async () => {
+        await deviceFactory.initialize();
+        setDeviceInstance(deviceFactory);
+        setInitialized(true);
+        try {
+            await getDevices();
+        } catch (error) {
+            console.error('Error fetching devices:', error);
+        }
+    };
 
     useEffect(() => {
-        const initializeDeviceFactory = async () => {
-            const device = new DeviceFactory();
-            await device.initialize();
-            setDeviceInstance(device);
-            setInitialized(true);
-            try {
-                const fetchedDevices = await device.getDevices();
-                setDevices(fetchedDevices);
-               
-            } catch (error) {
-                console.error('Error fetching devices:', error);
-            }
-        };
         initializeDeviceFactory();
-    }, [alertMessage,localStorage.orgaddresse]);
+    }, [alertMessage, localStorage.orgaddresse]);
 
     const showModal = () => {
         setOpen(true);
@@ -53,46 +67,70 @@ export function Devices() {
     const addDevice = async () => {
         try {
             await deviceInstance.addDevice(deviceName);
-            setAlertMessage('Device added successfully');
+            setAlertMessage(`${deviceName} was created`);
+            deviceInstance.setDeviceListenerCreate(eventcallback);
         } catch (error) {
             console.error('Error adding device:', error);
         }
     };
-    const isAdmin = localStorage.getItem('isAdmin') === 'true'; 
+
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
     return (
         <div>
-            {alertMessage ? <><Alert message={deviceName+ " was created"} type="success" closable showIcon /> <br></br> </>: null}
+            {!showInfoScreen ? (
+                <> 
+                    <div>
+                        {showAlertMessage ? (
+                            <>
+                                <Alert message={alertMessage} type="success" closable showIcon />
+                                <br />
+                            </>
+                        ) : null}
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: 'center', padding: '80px' }}>
+                            {isAdmin ? (
+                                <Button type='primary' onClick={showModal} block>
+                                    Create New Device
+                                </Button>
+                            ) : (
+                                <></>
+                            )}
+                        </div>
+                        <Modal
+                            title="Create New Device"
+                            visible={open}
+                            onOk={handleOk}
+                            confirmLoading={confirmLoading}
+                            onCancel={handleCancel}
+                            okText="Create New Device"
+                        >
+                            <Input
+                                placeholder="Enter the new Device Name"
+                                value={deviceName}
+                                onChange={(e) => setDeviceName(e.target.value)}
+                            />
+                        </Modal>
+                        <div>
+                            <DynamicCardsDevice items={devices}  eventcallback={eventcallback} setAlertMessage={setAlertMessage} setShowAlterMessage={setShowAlterMessage} />
+                        </div>
+                    </div>
+                </>
+            ) : 
             
-            <div style={{display:"flex",justifyContent:"center",alignItems: 'center',padding: '80px',}}>
-            
-            {isAdmin?<Button onClick={showModal} block>
-                Create New Device
-            </Button>:
-            <></>}
-            
+            <div style={{ textAlign: 'center', marginTop: '50px' }}>
+            <h2>Sie sind keiner Organisation zugeordnet.</h2>
+            <p>Um Geräte zu verwalten, müssen Sie entweder eine eigene Organisation erstellen oder einer bestehenden Organisation beitreten.</p>
+            <div style={{ marginTop: '20px' }}>
+                <Button type="primary" style={{ marginRight: '10px' }}>
+                    Eigene Organisation erstellen
+                </Button>
+                <Button type="default">
+                    Einer Organisation beitreten
+                </Button>
             </div>
-            <Modal
-                title="Create New Device"
-                visible={open}
-                onOk={handleOk}
-                confirmLoading={confirmLoading}
-                onCancel={handleCancel}
-                okText="Create New Device"
-                
-            >
-                <Input
-                    placeholder="Enter the new Device Name"
-                    value={deviceName}
-                    onChange={(e) => setDeviceName(e.target.value)}
-                />
-            </Modal>
+        </div>
             
-                <div>
-                    <DynamicCardsDevice items={devices} />
-                </div>
-           
-        
+            }
         </div>
     );
 }

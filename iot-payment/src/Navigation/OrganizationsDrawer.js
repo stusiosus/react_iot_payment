@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Drawer, Input, Button, List, Modal,Radio ,RadioChangeEvent} from "antd";
-import { OrganizationFactory,Organization,Voting } from "../web3/contracts";
+import { Drawer, Input, Button, List, Modal,Radio ,Card,Flex, Progress, Space } from "antd";
+import { OrganizationFactory,Organization,Campaign, FundRaising } from "../web3/contracts";
+import CampaignList from "../CampaignList";
 
 export default function OrganizationsDrawer({
   placement,
@@ -15,10 +16,14 @@ export default function OrganizationsDrawer({
   const [revieverAddress,setRecieverAddress]=useState(null);
   const [mintAdmin,setMintAmin]=useState(1);
   const [addOrganisationAddress,setAddOrganisationAddress]=useState(null);
+  const [campaigns,setCampaigns]=useState([]);
+  const [fundAmount,setFundAmount]=useState(0);
 
   const organizationFactory = new OrganizationFactory();
   const organizationContract = new Organization();
-  const voting= new Voting()
+  const campaign= new Campaign();
+  const fundRaising=new FundRaising();
+   
 
   async function loadOrganizations() {
     await organizationFactory.initialize();
@@ -73,15 +78,19 @@ export default function OrganizationsDrawer({
     await organizationContract.initialize(organization.NFTAddress);
     await organizationContract.mintOrganizationToken(revieverAddress,mintAdmin)
   }
-  const listProposal= async ()=>{
+  const listCampaigns= async ()=>{
 
-    await voting.initialize();
-    console.log(await voting.getProposalsByOrganization(localStorage.orgaddresse));
+    await fundRaising.initialize();
+    console.log(await fundRaising.getCampaignsByOrganization(localStorage.orgaddresse));
+    setCampaigns(await fundRaising.getCampaignsByOrganization(localStorage.orgaddresse));
   }
-  listProposal()
+
+
 
   useEffect(() => {
     loadOrganizations();
+    if (localStorage.orgaddresse)
+    listCampaigns();
   }, []);
 
   return (
@@ -190,8 +199,12 @@ export default function OrganizationsDrawer({
         <Button type="primary" shape="round" onClick={addOrganization}>
           add an existing Organization to your List
         </Button>
-
-        <div>{}</div>
+          <br></br>
+          <br></br>
+          <hr></hr>
+          <br></br>
+          <br></br>
+          <CampaignList/>
       </Drawer>
     </>
   );

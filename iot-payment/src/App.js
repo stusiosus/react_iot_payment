@@ -1,23 +1,46 @@
 import React from 'react';
+import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
-import Navbar from "./Navigation/Navbar"
-import {Devices} from "./Devices";
-import {Actions} from "./Actions";
+import Navbar from "./Navigation/Navbar";
+import { Devices } from "./Devices";
+import { Actions } from "./Actions";
+import WelcomePage from "./WelcomePage"; 
+import { Button, ConfigProvider, Space, Modal, Input } from "antd";
+import { getRandomColors } from "./utils";
+
+export default function App() {
+
+  const [colors, setColors] = useState([]);
+
+  useEffect(() => {
+    const color = getRandomColors("blue");
+    setColors(color);
+   
+  }, []);
 
 
-export default function App(){
 
-      return(
+    return (
         <div>
-        <Navbar />
-        <Routes>
-        <Route path="/actions"  element={<Actions />} />
-        <Route path="/devices" element={<Devices />} />
-        </Routes>
+          <ConfigProvider
+        theme={{
+          components: {
+            Button: {
+              colorPrimary: `linear-gradient(135deg, ${colors.join(", ")})`,
+              colorPrimaryHover: `linear-gradient(135deg, ${colors.join(", ")})`,
+              colorPrimaryActive: `linear-gradient(135deg, ${colors.join(", ")})`,
+              lineWidth: 0,
+            },
+          },
+        }}
+      >
+            <Navbar />
+            <Routes>
+                <Route path="/" element={<WelcomePage />} />
+                <Route path="/actions" element={<Actions />} />
+                <Route path="/devices" element={<Devices />} />
+            </Routes>
+            </ConfigProvider>
         </div>
-     
-      )
-      
-
-
+    );
 }

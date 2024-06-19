@@ -1,17 +1,12 @@
-
-
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { Button, ConfigProvider, Space, Modal, Input } from "antd";
-import { TinyColor } from "@ctrl/tinycolor";
-import { getRandomColors } from "../utils";
 import { Balance } from "../web3/contracts";
 import OrganizationsDrawer from "./OrganizationsDrawer"; // Importiere die Drawer-Komponente
 
 export default function Navbar() {
-  const [provider, setPorvider] = useState(null);
+const [provider, setPorvider] = useState(null);
 const [signer, setSigner] = useState(null);
-const [colors, setColors] = useState([]);
 const [userBalance, setUserBalance] = useState(0);
 const [depositAmount,setDepositAmount]=useState(0);
 const [withdrawAmount,setWithdrawAmount]=useState(userBalance);
@@ -70,26 +65,12 @@ async function withdraw(){
 
 useEffect(() => {
   setupwallet();
-  const color = getRandomColors("blue");
-  setColors(color);
   getBalance();
 }, []);
 
 
   return (
     <>
-      <ConfigProvider
-        theme={{
-          components: {
-            Button: {
-              colorPrimary: `linear-gradient(135deg, ${colors.join(", ")})`,
-              colorPrimaryHover: `linear-gradient(135deg, ${colors.join(", ")})`,
-              colorPrimaryActive: `linear-gradient(135deg, ${colors.join(", ")})`,
-              lineWidth: 0,
-            },
-          },
-        }}
-      >
         <OrganizationsDrawer
           placement={placement}
           onClose={onClose}
@@ -158,7 +139,7 @@ useEffect(() => {
             </Modal>
           </div>
         </div>
-      </ConfigProvider>
+      
     </>
   );
 }
