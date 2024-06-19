@@ -7,7 +7,8 @@ cp -r artifacts/contracts/DeviceFactory.sol/DeviceFactory.json ../iot-payment/sr
 cp -r artifacts/contracts/Balance.sol/Balance.json ../iot-payment/src/Abi/Balance.json
 cp -r artifacts/contracts/OrganizationFactory.sol/OrganizationFactory.json ../iot-payment/src/Abi/OrganizationFactory.json
 cp -r artifacts/contracts/Organization.sol/Organization.json ../iot-payment/src/Abi/Organization.json
-cp -r artifacts/contracts/Voting.sol/Voting.json ../iot-payment/src/Abi/Voting.json
+cp -r artifacts/contracts/FundRaising.sol/FundRaising.json ../iot-payment/src/Abi/FundRaising.json
+cp -r artifacts/contracts/Campaign.sol/Campaign.json ../iot-payment/src/Abi/Campaign.json
 
 
 echo "copied all values to react src directory"
