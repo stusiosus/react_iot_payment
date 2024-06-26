@@ -2,7 +2,6 @@
 pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Device.sol";
-import "hardhat/console.sol";
 import "./ActionFactory.sol";
 import "./Balance.sol";
 import "hardhat/console.sol";
@@ -26,7 +25,10 @@ contract Action is Ownable {
     }
 
     receive() external payable {
-        require(msg.value >= pricePerUnit);
+        if (msg.value < pricePerUnit) {
+            actionFactory.logInsufficientPayment(address(this), id, msg.sender, msg.value, pricePerUnit);
+            revert("Insufficient payment");
+        }
         (bool success, ) = device.owner().call{value: msg.value}("");
         require(success, "Transfer failed");
         actionFactory.logPayedAction(address(this), id, name, msg.value / pricePerUnit);

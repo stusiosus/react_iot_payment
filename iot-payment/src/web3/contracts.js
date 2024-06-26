@@ -9,19 +9,21 @@ const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
 const organizationABI=require("../Abi/Organization.json");
 const fundraisingABI=require("../Abi/FundRaising.json");
 const campaignABI=require("../Abi/Campaign.json");
+const usernameRegistry=require("../Abi/UsernameRegistry.json")
 
-// const ORGANIZATION_FACTORY_CONTRACT = "0xF95D936a770BA6A26aF3d01ced6C354D7B5a6465";
-// const DEVICE_FACTORY_CONTRACT = "0x2AAc0823376bbb4b92Ef4e500F8A7e5A16bcFcca";
-// const ACTION_FACCTORY_CONTRACT = "0xCbF07AB9985b073FcBe2Fee6E6e1801a7Ed4d014";
-// const BALANCE_CONTRACT = "0x5354BEb3B48fc6f09F1d6b0D6f91D86a1EdDd803";
 
+// const ORGANIZATION_FACTORY_CONTRACT = "0xF4cF319e0c1313937A36211f1A5a4B127d45038d";
+// const DEVICE_FACTORY_CONTRACT = "0x69Ce1e91c667a59B9a1269eC8696dCace54E253d";
+// const ACTION_FACCTORY_CONTRACT = "0x437B80947f20ada40549f0c05aba727f85ccFbEE";
+// const BALANCE_CONTRACT = "0xBCBA348fd4B33AAd8Bb133A3d0D6dF9Fd33f7d09";
+// const FUNDRAISING_CONTRACT="0xF11e14555DDfdAB77A0F361c4f6142f26d52fbA5";
 
 const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 const BALANCE_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 const FUNDRAISING_CONTRACT="0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
-const  CAMPAIGN_CONTRACT="";
+const USERNAMEREGISTRY_CONTRACT="0x0165878A594ca255338adfa4d48449f69242Eb8F";
 
 
 
@@ -71,7 +73,27 @@ export class OrganizationFactory{
   async addOrganization(address){
     await this.organizationFactoryContract.addOrganization(address);
   }
+  removeOrganization
+ 
+  async removeOrganization(address){
+    await this.organizationFactoryContract.removeOrganization(address);
+  }
 
+ setOrganizationListenerCreate(callback) {
+    this.organizationFactoryContract.on("OrganizationCreated", (id, name, creator) => {
+      callback();
+    });
+  }
+  setOrganizationListenerAdd(callback) {
+    this.organizationFactoryContract.on("OrganizationAdded", (user,organizatioonAddress) => {
+      callback();
+    });
+  }
+  setOrganizationListenerRemove(callback) {
+    this.organizationFactoryContract.on("OrganizationRemoved", (user,organizatioonAddress) => {
+      callback();
+    });
+  }
 
 
 }
@@ -383,7 +405,7 @@ export class FundRaising {
   }
  
   setCampaignListenerCreate(callback) {
-    this.actionFactoryContract.on("CampaignCreated", (campaignId,campaignaddress,description,organizationAddress,duration,targetAmount
+    this.FundRaisingContract.on("CampaignCreated", (campaignId,campaignaddress,description,organizationAddress,duration,targetAmount
     ) => {
       callback();
     });
@@ -421,6 +443,51 @@ export class Campaign {
     this.CampaignContract.on("Contributed", (contributor, amount) => {
       callback();
     });
+  }
+
+  async getContributions()  {
+
+    const contributions=await this.CampaignContract.getContributions(this.signer.address);
+    return contributions.toString()
+  }
+
+  
+  async  getAllContributedEvents() {
+    try {
+      const filter = this.CampaignContract.filters.Contributed();
+
+      const events = await this.CampaignContract.queryFilter(filter, 0, 'latest');
+    
+      events.forEach(event => {
+          const { contributor, amount } = event.args;
+          console.log(`Contributor: ${contributor}, Amount: ${ethers.formatEther(amount)} ETH`);
+      });
+  } catch (error) {
+      console.error('Error fetching events:', error);
+  }
+}
+
+}
+
+export class UsernameRegistry{
+
+  async initialize() {
+    this.signer = await provider.getSigner();
+    this.usernameRegestry = new ethers.Contract(
+      USERNAMEREGISTRY_CONTRACT,
+      usernameRegistry.abi,
+      this.signer
+    );
+  }
+
+  async createUsername(username){
+    await this.usernameRegestry.createUsername(username)
+  }
+  async updateUsername(newUsername){
+    await this.usernameRegestry.updateUsername(newUsername)
+  }
+  async getUsername(useraddress){
+    await this.usernameRegestry.getUsername(useraddress)
   }
 
 }

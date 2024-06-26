@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Modal, Button,Input,Space } from "antd";
+import { Card, Col, Row, Modal, Button,Input,Space,Spin } from "antd";
 import { useNavigate } from "react-router-dom";
-import { Device, DeviceFactory } from "./web3/contracts"; // Adjust the import according to your project structure
-import { splititemsIntoGroups, getRandomColors } from "./utils"; // Ensure these utilities are defined
+import { Device, DeviceFactory } from "../web3/contracts"; // Adjust the import according to your project structure
+import { splititemsIntoGroups, getRandomColors } from "../utils"; // Ensure these utilities are defined
 
-export function DynamicCardsDevice({ items, eventcallback,setAlertMessage,setShowAlterMessage }) {
+export function DynamicCardsDevice({ items, eventcallback,setAlertMessage,setShowAlterMessage,setLoading }) {
   const [currentDevice, setCurrentDevice] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [newDeviceName,setNewDeviceName]=useState(null);
@@ -52,9 +52,11 @@ export function DynamicCardsDevice({ items, eventcallback,setAlertMessage,setSho
   };
 
   const deleteDevice = async () => {
+    
     setShowAlterMessage(false);
     await deviceFactory.initialize();
     await deviceFactory.deleteDevice(currentDevice.id);
+    setLoading(true);
     setAlertMessage(`${currentDevice.name} was deleted`);
     deviceFactory.setDeviceListenerDelete(eventcallback);
     setOpenModal(false);
@@ -105,20 +107,23 @@ export function DynamicCardsDevice({ items, eventcallback,setAlertMessage,setSho
           <h2>{currentDevice.name}</h2>
           <p>Device Address: {currentDevice.deviceAddress}</p>
 
-            <Space>
-          <Input
-            placeholder="Enter the new Device Name"
-            value={newDeviceName}
-            onChange={(e) => setNewDeviceName(e.target.value)}
-          />
-          <Button type="primary"  onClick={updateDeviceName}>set New Device Name</Button>
-          </Space>
-            <br></br>
-            <br></br>
+          
           {isAdmin ? (
+            <div>
+              <Space>
+              <Input
+                placeholder="Enter the new Device Name"
+                value={newDeviceName}
+                onChange={(e) => setNewDeviceName(e.target.value)}
+              />
+              <Button type="primary"  onClick={updateDeviceName}>set New Device Name</Button>
+              </Space>
+                <br></br>
+                <br></br>
             <Button type="primary" onClick={deleteDevice} danger>
               Delete {currentDevice.name}
             </Button>
+            </div>
           ) : (
             <></>
           )}

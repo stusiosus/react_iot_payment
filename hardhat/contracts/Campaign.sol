@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
-
+import "hardhat/console.sol";
 contract Campaign {
     uint256 public id;
     string public description;
@@ -10,6 +10,7 @@ contract Campaign {
     uint256 public targetAmount;
     uint256 public startTime;
     uint256 public duration;
+    address public creator;
     mapping(address => uint256) public contributions;
     address[] public contributors;
     bool public active;
@@ -25,7 +26,8 @@ contract Campaign {
         address payable _actionAddress,
         uint256 _targetAmount,
         uint256 _startTime,
-        uint256 _duration
+        uint256 _duration,
+        address _creator
     ) {
         id = _id;
         description = _description;
@@ -34,7 +36,8 @@ contract Campaign {
         targetAmount = _targetAmount;
         startTime = _startTime;
         duration = _duration;
-        active=true;
+        creator = _creator;
+        active = true;
     }
 
     receive() external payable {
@@ -59,8 +62,7 @@ contract Campaign {
         if (successful) {
             (bool success, ) = actionAddress.call{value: totalAmount}("");
             require(success, "Transfer failed");
-            active=false;
-
+            active = false;
         } else {
             refundContributions();
         }
@@ -76,9 +78,10 @@ contract Campaign {
                 contributions[contributor] = 0;
                 (bool success, ) = contributor.call{value: amount}("");
                 require(success, "Refund failed");
-                active=false;
             }
         }
+
+        active = false;
 
         emit ContributionsRefunded();
     }
@@ -89,5 +92,9 @@ contract Campaign {
 
     function getContributors() external view returns (address[] memory) {
         return contributors;
+    }
+
+    function getCreator() external view returns (address) {
+        return creator;
     }
 }

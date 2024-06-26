@@ -17,6 +17,7 @@ contract Fundraising {
         uint256 targetAmount;
         uint256 startTime;
         uint256 duration;
+        address creator;
         address[] contributors;
     }
 
@@ -33,7 +34,7 @@ contract Fundraising {
         require(Organization(_organizationAddress).balanceOf(msg.sender) > 0, "Caller does not hold an organization NFT");
 
         uint256 targetAmount = Action(_actionAddress).getPricePerUnit() * amount;
-        Campaign newCampaign = new Campaign(nextCampaignId, description, _organizationAddress, _actionAddress, targetAmount, block.timestamp, duration);
+        Campaign newCampaign = new Campaign(nextCampaignId, description, _organizationAddress, _actionAddress, targetAmount, block.timestamp, duration, msg.sender);
         
         campaigns[nextCampaignId] = address(newCampaign);
         organizationCampaigns[_organizationAddress].push(nextCampaignId);
@@ -69,6 +70,7 @@ contract Fundraising {
                     targetAmount: campaign.targetAmount(),
                     startTime: campaign.startTime(),
                     duration: campaign.duration(),
+                    creator: campaign.getCreator(),
                     contributors: campaign.getContributors()
                 });
                 resultIndex++;

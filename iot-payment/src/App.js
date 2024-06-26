@@ -2,8 +2,8 @@ import React from 'react';
 import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navbar from "./Navigation/Navbar";
-import { Devices } from "./Devices";
-import { Actions } from "./Actions";
+import { Devices } from "./Device/Devices";
+import { Actions } from "./Action/Actions";
 import WelcomePage from "./WelcomePage"; 
 import { Button, ConfigProvider, Space, Modal, Input } from "antd";
 import { getRandomColors } from "./utils";
@@ -31,6 +31,8 @@ export default function App() {
               colorPrimaryActive: `linear-gradient(135deg, ${colors.join(", ")})`,
               lineWidth: 0,
             },
+        
+
           },
         }}
       >

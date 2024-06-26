@@ -37,11 +37,9 @@ contract DeviceFactory {
     function updateDeviceName(uint256 _deviceId, string memory _newName) public {
         require(Devices[_deviceId].deviceAddress != address(0), "Device does not exist");
         require(Organization(Devices[_deviceId].organisationAddress).isAdmin(msg.sender), "No AdminNFT -> not allowed to update the device");
-
         Device device = Device(Devices[_deviceId].deviceAddress);
         device.updateName(_newName);
         Devices[_deviceId].name = _newName;
-
         emit DeviceUpdated(_deviceId, _newName);
     }
 

@@ -17,7 +17,7 @@ export default function OrganizationsDrawer({
   const [mintAdmin,setMintAmin]=useState(1);
   const [addOrganisationAddress,setAddOrganisationAddress]=useState(null);
   const [campaigns,setCampaigns]=useState([]);
-  const [fundAmount,setFundAmount]=useState(0);
+
 
   const organizationFactory = new OrganizationFactory();
   const organizationContract = new Organization();
@@ -33,11 +33,20 @@ export default function OrganizationsDrawer({
   const createOrganization = async () => {
     await organizationFactory.initialize();
     await organizationFactory.createOrganization(organizationName);
+    organizationFactory.setOrganizationListenerCreate(loadOrganizations);
   };
   const addOrganization = async () => {
     await organizationFactory.initialize();
     await organizationFactory.addOrganization(addOrganisationAddress);
+    organizationFactory.setOrganizationListenerAdd(loadOrganizations);
   };
+  const removeOrganization = async () => {
+    await organizationFactory.initialize();
+    await organizationFactory.removeOrganization(organization.NFTAddress);
+    organizationFactory.setOrganizationListenerRemove(loadOrganizations);
+  };
+
+
   async function isAdmin(org){
     await organizationContract.initialize(org.NFTAddress);
     return await organizationContract.isAdmin();
@@ -102,7 +111,7 @@ export default function OrganizationsDrawer({
       >
         {organization?
         <div>
-        {organization.NFTAddress}
+        Organization Address: {organization.NFTAddress}
         <br></br>
         {organization.NFTsAddress}
         <br></br>
@@ -133,7 +142,7 @@ export default function OrganizationsDrawer({
         <br></br>
         <hr></hr>
         <br></br>
-
+        <Button type="primary" onClick={removeOrganization}>Delete Organization from your List</Button>
       </Modal>
       <Drawer
         title="Organizations"

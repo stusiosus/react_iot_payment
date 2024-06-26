@@ -29,6 +29,7 @@ contract Device is Ownable {
     }
 
     function updateName(string memory _newName) external onlyOwner {
+        console.log("updateName called succesfully with name : ",_newName);
         name = _newName;
     }
 

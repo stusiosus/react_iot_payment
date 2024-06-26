@@ -8,7 +8,7 @@ import "hardhat/console.sol";
 
 contract ActionFactory is Ownable {
 
-    struct ActionInfo{
+    struct ActionInfo {
         uint256 id;
         address payable ActionAddress;
         string name;
@@ -30,6 +30,7 @@ contract ActionFactory is Ownable {
     event PayedAction(address actionAddress, uint256 id, string name, uint256 amount);
     event ActionUpdated(uint256 indexed id, string newName, string newUnit, uint256 newPrice);
     event ActionDeleted(uint256 indexed id);
+    event InsufficientPayment(address actionAddress, uint256 actionId, address payer, uint256 amountPaid, uint256 pricePerUnit);
 
     function createAction(string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress, address _deviceOwner, address _organisationAddress) public returns (address) {
         Action newAction = new Action(actionCounter, _name, _unit, _pricePerUnit, _deviceAddress, payable(address(balance)));
@@ -40,7 +41,7 @@ contract ActionFactory is Ownable {
         return address(newAction);
     }
 
-    function setBalanceContract(address payable _balanceAddress) external onlyOwner() {
+    function setBalanceContract(address payable _balanceAddress) external onlyOwner {
         balance = Balance(_balanceAddress);
     }
 
@@ -107,5 +108,10 @@ contract ActionFactory is Ownable {
     function logPayedAction(address _actionAddress, uint256 _id, string memory _name, uint256 _amount) external {
         require(msg.sender == _actionAddress, "Only the action contract can call this function");
         emit PayedAction(_actionAddress, _id, _name, _amount);
+    }
+
+    function logInsufficientPayment(address _actionAddress, uint256 _id, address _payer, uint256 _amountPaid, uint256 _pricePerUnit) external {
+        require(msg.sender == _actionAddress, "Only the action contract can call this function");
+        emit InsufficientPayment(_actionAddress, _id, _payer, _amountPaid, _pricePerUnit);
     }
 }

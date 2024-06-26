@@ -41,11 +41,14 @@ async function main() {
      await fundraising.deployed();
      console.log("fundraising contract deployed to:", fundraising.address);
  
+
+
      // Deploy Proposal contract
-     const Campaign = await ethers.getContractFactory("Campaign");
-     const campaign = await Fundraising.deploy();
-     await campaign.deployed();
-     console.log("campaign contract deployed to:", campaign.address);
+     const UsernameRegistry = await ethers.getContractFactory("UsernameRegistry");
+     const usernameRegistry = await UsernameRegistry.deploy();
+     await usernameRegistry.deployed();
+     console.log("campaign contract deployed to:", usernameRegistry.address);
+ 
  
 
 
