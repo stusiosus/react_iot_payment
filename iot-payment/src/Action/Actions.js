@@ -98,7 +98,7 @@ export function Actions() {
       ) : null}
          <div style={{ display: "flex", justifyContent: "center", alignItems: 'center', padding: '20px' }}></div>
       <Modal
-        title="Create New Action"
+        title="Create New Action for Device "
         visible={open}
         onOk={handleOk}
         confirmLoading={confirmLoading}
@@ -107,6 +107,7 @@ export function Actions() {
       >
         <br></br>
         <br></br>
+        <h3>Action Name:</h3>
         <Input
           placeholder="Enter the new Action Name"
           value={actionName}
@@ -114,6 +115,7 @@ export function Actions() {
         />
         <br></br>
         <br></br>
+        <h3>Action Billing Unit:</h3>
         <Input
           placeholder="Enter the new Action Unit"
           value={actionunit}
@@ -121,6 +123,7 @@ export function Actions() {
         />
         <br></br>
         <br></br>
+        <h3>Action Price:</h3>
         <Input
           placeholder="Enter the new Action Price per Unit"
           value={actionPrice}

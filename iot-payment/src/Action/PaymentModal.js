@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Modal, Button, Input, Space, QRCode } from "antd";
+import { Modal, Button, Input, Space, QRCode, Tooltip } from "antd";
 import { Action, ActionFactory, FundRaising } from "../web3/contracts";
 import { build } from 'eth-url-parser';
+import { QuestionCircleOutlined } from '@ant-design/icons';
 
 export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, setAlertMessage, setShowAlterMessage, setLoading }) => {
   const [campaignAmount, setCampaignAmount] = useState(1);
   const [campaignDuration, setCampaignDuration] = useState(3600);
+  const [campaignDescription,setCampaignDescription]=useState("");
   const action = new Action();
   const fundRaising = new FundRaising();
-  const actionFactory=new ActionFactory();
+  const actionFactory = new ActionFactory();
 
   const handleOk = () => {
     setOpen(false);
@@ -24,7 +26,7 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
     await action.payActionInstant(currrentAction.price);
     setOpen(false);
     setLoading(true);
-    setAlertMessage(`Action with Name: ${currrentAction.name} recieved payment`);
+    setAlertMessage(`Action with Name: ${currrentAction.name} received payment`);
     actionFactory.setActionListenerPayed(eventcallback);
   };
 
@@ -34,7 +36,7 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
     await action.payAction(1);
     setOpen(false);
     setLoading(true);
-    setAlertMessage(`Action with Name: ${currrentAction.name} recieved payment from Balance`);
+    setAlertMessage(`Action with Name: ${currrentAction.name} received payment from Balance`);
     actionFactory.setActionListenerPayed(eventcallback);
   };
 
@@ -42,7 +44,7 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
     setShowAlterMessage(false);
     await fundRaising.initialize();
     await fundRaising.createCampaign(
-      currrentAction.name,
+      (currrentAction.name+" : "+campaignDescription),
       currrentAction.organisationAddress,
       currrentAction.ActionAddress,
       campaignDuration,
@@ -54,7 +56,7 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
     fundRaising.setCampaignListenerCreate(eventcallback)
   };
 
-  function getActionPaymentUrl(){
+  function getActionPaymentUrl() {
     const url = build({
       scheme: 'ethereum',
       prefix: 'pay',
@@ -68,7 +70,18 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
 
   return (
     <Modal
-      title={currrentAction.name}
+      title={
+        <span>
+          Pay the Action {currrentAction.name}
+          <Tooltip title='This action allows you to make a payment for the specified action. For this you have three options.
+          The first is to pay the Action with your web3 wallet (MetaMask).For this you can use your Chrome extension or pay with the QR Code.
+          The second option is to pay with
+          the Platform Balance.In this to cases the specific Action gets triggered instantly. If you use the third option and create an campaign, every person in this Organisation can pay an Amount he wants and the Action performs if the 
+          Price for the given Action is reached.'>
+            <QuestionCircleOutlined style={{ marginLeft: 8 }} />
+          </Tooltip>
+        </span>
+      }
       open={open}
       onOk={handleOk}
       onCancel={handleCancel}
@@ -80,6 +93,11 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
       )}
       <br />
       <br />
+      <br />
+      <br />
+
+
+      <h3>Pay full Amount of {currrentAction.name} ({(currrentAction.price).toString()}) to perform instantly: </h3>
       <div
         style={{
           display: "flex",
@@ -103,7 +121,7 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
       </div>
 
       <br /><hr /><br />
-
+      <h3>create Campaign for  {currrentAction.name}  and share the cost: </h3>
       <div
         style={{
           display: "flex",
@@ -112,6 +130,12 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
           marginTop: "20px",
         }}
       >
+        <Input
+          placeholder="Description of Campaign"
+          onChange={(e) => {
+            setCampaignDescription(e.target.value);
+          }}
+        ></Input>
         <Input
           placeholder="Amount of Actions"
           onChange={(e) => {

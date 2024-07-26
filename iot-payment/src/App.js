@@ -7,6 +7,8 @@ import { Actions } from "./Action/Actions";
 import WelcomePage from "./WelcomePage"; 
 import { Button, ConfigProvider, Space, Modal, Input } from "antd";
 import { getRandomColors } from "./utils";
+import CampaignList from './Campaign/CampaignList';
+import CampaignDonations from './Campaign/CampaignDonations';
 
 export default function App() {
 
@@ -41,6 +43,8 @@ export default function App() {
                 <Route path="/" element={<WelcomePage />} />
                 <Route path="/actions" element={<Actions />} />
                 <Route path="/devices" element={<Devices />} />
+                <Route path="/campaigns" element={<CampaignList />} />
+                <Route path="/donations" element={<CampaignDonations />} />
             </Routes>
             </ConfigProvider>
         </div>

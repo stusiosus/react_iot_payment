@@ -487,7 +487,10 @@ export class UsernameRegistry{
     await this.usernameRegestry.updateUsername(newUsername)
   }
   async getUsername(useraddress){
-    await this.usernameRegestry.getUsername(useraddress)
+    debugger;
+    const username= await this.usernameRegestry.getUsername(useraddress)
+    
+    return username;
   }
 
 }
