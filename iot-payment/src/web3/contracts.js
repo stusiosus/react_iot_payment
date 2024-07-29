@@ -446,8 +446,8 @@ export class Campaign {
   }
 
   async getContributions()  {
-
     const contributions=await this.CampaignContract.getContributions(this.signer.address);
+
     return contributions.toString()
   }
 
@@ -457,11 +457,15 @@ export class Campaign {
       const filter = this.CampaignContract.filters.Contributed();
 
       const events = await this.CampaignContract.queryFilter(filter, 0, 'latest');
+      let event_list=[]
     
-      events.forEach(event => {
+      events.forEach(event =>{
           const { contributor, amount } = event.args;
+
+          event_list.push( event.args)
           console.log(`Contributor: ${contributor}, Amount: ${ethers.formatEther(amount)} ETH`);
       });
+      return event_list
   } catch (error) {
       console.error('Error fetching events:', error);
   }
@@ -487,7 +491,7 @@ export class UsernameRegistry{
     await this.usernameRegestry.updateUsername(newUsername)
   }
   async getUsername(useraddress){
-    debugger;
+    
     const username= await this.usernameRegestry.getUsername(useraddress)
     
     return username;

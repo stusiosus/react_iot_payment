@@ -1,20 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Card, List } from 'antd';
-import { Campaign } from '../web3/contracts';
+import { Campaign, UsernameRegistry } from '../web3/contracts';
 
 const CampaignDonations = () => {
   const location = useLocation();
-  const { campaign } = location.state || {};
+  const { campaign } = location.state;
   const [contributions, setContributions] = useState([]);
+  const [usernames, setUsernames] = useState({});
+  const [ownContribution, setOwnContribution] = useState('0');
   const campaignContract = new Campaign();
+  const usernameRegistry = new UsernameRegistry();
+  const currentUsername = localStorage.userName;
 
   useEffect(() => {
-
     const fetchContributions = async () => {
-      await campaignContract.initialize(campaign.campaignAddress);
-      const contributions = await campaignContract.getContributions();
-      setContributions(contributions);
+      try {
+        await campaignContract.initialize(campaign[1]);
+        await usernameRegistry.initialize();
+
+        const contributions = await campaignContract.getAllContributedEvents();
+        console.log('Contributions:', contributions); // Debugging line
+
+        const contributors = contributions.map(contribution => contribution.contributor);
+        const usernames = {};
+
+        for (const address of contributors) {
+          const username = await usernameRegistry.getUsername(address);
+          usernames[address] = username;
+        }
+
+        setUsernames(usernames);
+        setContributions(contributions);
+
+        // Calculate the total contribution of the current user
+        const ownTotalContribution = contributions.reduce((total, contribution) => {
+          // Fetch username for the contributor
+          if (usernames[contribution.contributor] === currentUsername) {
+            return total + parseFloat(contribution.amount.toString()); // Add contribution amount
+          }
+          return total;
+        }, 0);
+
+        setOwnContribution(ownTotalContribution.toFixed(2)); // Format to two decimal places
+      } catch (error) {
+        console.error('Error fetching contributions:', error);
+      }
     };
 
     if (campaign) {
@@ -23,20 +54,27 @@ const CampaignDonations = () => {
   }, [campaign]);
 
   return (
-    <div>
-      <h2>Donations for {campaign.description}</h2>
-      <p>Total Amount Contributed: {Number(campaign.totalAmount)}</p>
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <h2>{`Donations for ${campaign[2]}`}</h2>
+      <p>{`Total Amount Contributed: ${campaign[5]} /  from target Amount : ${campaign[6]}`}</p>
+      <p>{`Your Total Contribution: ${ownContribution || '0'} `}</p>
       <List
         grid={{ gutter: 16, column: 4 }}
         dataSource={contributions}
         renderItem={(item) => (
           <List.Item>
-            <Card title={item.contributor}>
-              <p>Amount: {item.amount}</p>
-              <p>Date: {new Date(Number(item.timestamp) * 1000).toLocaleString()}</p>
+            <Card 
+              title={usernames[item.contributor] || 'Loading...'} 
+              style={{ 
+                textAlign: 'center',
+                backgroundColor: currentUsername === usernames[item.contributor] ? '#e6f7ff' : '#fff' // Highlight if match
+              }}
+            >
+              <p>{`Amount: ${(item.amount).toString()} `}</p>
             </Card>
           </List.Item>
         )}
+        style={{ justifyContent: 'center' }}
       />
     </div>
   );

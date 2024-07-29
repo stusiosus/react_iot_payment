@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Progress, Button, Space, Input, Spin, Modal } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { Campaign, FundRaising } from '../web3/contracts';
+import { Campaign, FundRaising,UsernameRegistry } from '../web3/contracts';
 import { DynamicCardsCampaign } from './DynamicCardsCampaign';
 import { getRandomColors } from '../utils';
 import QRCode from 'qrcode.react';
@@ -18,9 +18,11 @@ const CampaignList = () => {
   const [contributed, setContributed] = useState(null);
   const [openModalPayment, setOpenModalPayment] = useState(false);
   const navigate = useNavigate();
+  const [username, setUsername] = useState(null);
 
   const campaignContract = new Campaign();
   const fundRaisingContract = new FundRaising();
+  const usernameRegistry = new UsernameRegistry();
 
   const listCampaigns = async () => {
     await fundRaisingContract.initialize();
@@ -85,13 +87,45 @@ const CampaignList = () => {
   };
 
   const handleMoreClick = async (_campaign) => {
+    
+    await usernameRegistry.initialize();
+    const username = await usernameRegistry.getUsername(_campaign.creator);
+
+    setUsername(username);
     setSelectedCampaign(_campaign);
     await campaignContract.initialize(_campaign.campaignAddress);
+    
   };
 
   const handleDonationsClick = () => {
-    navigate('/donations', { state: { campaign: selectedCampaign } });
+    try {
+      // Function to convert BigInt to string
+      const convertBigIntToString = (obj) => {
+        if (obj && typeof obj === 'object') {
+          for (const key in obj) {
+            if (typeof obj[key] === 'bigint') {
+              obj[key] = obj[key].toString();
+            } else if (typeof obj[key] === 'object') {
+              convertBigIntToString(obj[key]);
+            }
+          }
+        }
+      };
+  
+      // Clone the selectedCampaign to avoid mutating the original object
+      const campaign = JSON.parse(JSON.stringify(selectedCampaign, (key, value) =>
+        typeof value === 'bigint' ? value.toString() : value
+      ));
+  
+      // Navigate with the campaign state
+      navigate('/donations', {
+        state: { campaign },
+      });
+    } catch (error) {
+      console.error('The selected campaign cannot be serialized', error);
+    }
   };
+  
 
   const endCampaign = async () => {
     await campaignContract.initialize(selectedCampaign.campaignAddress);
@@ -148,6 +182,7 @@ const CampaignList = () => {
           <p>Amount already paid: {Number(selectedCampaign.totalAmount)}</p>
           <p>Target Amount: {Number(selectedCampaign.targetAmount)}</p>
           <p>Start Time: {new Date(Number(selectedCampaign.startTime) * 1000).toLocaleString()}</p>
+          <p>created by : {username}</p>
           <p>Remaining Time: {remainingTime}</p>
 
           {campaignEnded && (

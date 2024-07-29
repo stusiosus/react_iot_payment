@@ -73,17 +73,23 @@ export default function Navbar() {
     await usernameRegistry.initialize();
     const userAddress = signer ? signer.address : "";
     const fetchedUsername = await usernameRegistry.getUsername(userAddress);
-    if (fetchedUsername) {
+    if (fetchedUsername!="") {
       setUsername(fetchedUsername);
       setIsUsernameSet(true);
     } else {
       setIsModalOpen(true);
     }
+    localStorage.userName=fetchedUsername;
   }
 
   async function updateUsername(newUsername) {
     await usernameRegistry.initialize();
-    await usernameRegistry.updateUsername(newUsername);
+    if (isUsernameSet){
+      await usernameRegistry.updateUsername(newUsername);
+    }
+    else{
+      await usernameRegistry.createUsername(newUsername);
+    }
     setUsername(newUsername);
     setIsUsernameSet(true);
     setIsModalOpen(false);
