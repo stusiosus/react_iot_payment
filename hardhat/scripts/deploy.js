@@ -27,20 +27,20 @@ async function main() {
 
 
 
-    const Balance = await ethers.getContractFactory("Balance");
-    const balance = await Balance.deploy(actionFactory.address);
-    await balance.deployed();
-    console.log("Balance contract deployed to:", balance.address);
-
-
-  await actionFactory.setBalanceContract(balance.address);
+     // Deploy Proposal contract
+     const Fundraising = await ethers.getContractFactory("Fundraising");
+     const fundraising = await Fundraising.deploy();
+     await fundraising.deployed();
+     console.log("fundraising contract deployed to:", fundraising.address);
+ 
 
 
      // Deploy Proposal contract
-     const Proposal = await ethers.getContractFactory("Voting");
-     const proposal = await Proposal.deploy();
-     await proposal.deployed();
-     console.log("Voting contract deployed to:", proposal.address);
+     const UsernameRegistry = await ethers.getContractFactory("UsernameRegistry");
+     const usernameRegistry = await UsernameRegistry.deploy();
+     await usernameRegistry.deployed();
+     console.log("UsernameRegistry contract deployed to:", usernameRegistry.address);
+ 
  
 
 
