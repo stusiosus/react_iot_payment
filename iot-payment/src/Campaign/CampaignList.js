@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Progress, Button, Space, Input, Spin, Modal,Typography } from 'antd';
+import { Card, Progress, Button, Space, Input, Spin, Modal,Typography,QRCode } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { Campaign, FundRaising,UsernameRegistry } from '../web3/contracts';
 import { DynamicCardsCampaign } from './DynamicCardsCampaign';
 import { getRandomColors } from '../utils';
-import QRCode from 'qrcode.react';
 import { parse, build } from 'eth-url-parser';
 
 const {Title}=Typography;

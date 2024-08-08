@@ -4,7 +4,6 @@ const deviceAbi = require("../Abi/Device.json");
 const deviceFactoryAbi = require("../Abi/DeviceFactory.json");
 const actionFactoryAbi = require("../Abi/ActionFactory.json");
 const actionAbi = require("../Abi/Action.json");
-const balanceABI = require("../Abi/Balance.json");
 const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
 const organizationABI=require("../Abi/Organization.json");
 const fundraisingABI=require("../Abi/FundRaising.json");
@@ -12,18 +11,17 @@ const campaignABI=require("../Abi/Campaign.json");
 const usernameRegistry=require("../Abi/UsernameRegistry.json")
 
 
-// const ORGANIZATION_FACTORY_CONTRACT = "0xF4cF319e0c1313937A36211f1A5a4B127d45038d";
-// const DEVICE_FACTORY_CONTRACT = "0x69Ce1e91c667a59B9a1269eC8696dCace54E253d";
-// const ACTION_FACCTORY_CONTRACT = "0x437B80947f20ada40549f0c05aba727f85ccFbEE";
-// const BALANCE_CONTRACT = "0xBCBA348fd4B33AAd8Bb133A3d0D6dF9Fd33f7d09";
-// const FUNDRAISING_CONTRACT="0xF11e14555DDfdAB77A0F361c4f6142f26d52fbA5";
+const ORGANIZATION_FACTORY_CONTRACT = "0x13D44d4F90bB84584FD1EBf5dFd7C9c83f31f137";
+const DEVICE_FACTORY_CONTRACT = "0x1a03d8D3bcAe7d0214c4A44496E9a923399cd706";
+const ACTION_FACCTORY_CONTRACT = "0x8dB51b735a557819D3f6aa26FB858a86F0026672";
+const FUNDRAISING_CONTRACT="0x7BfFDB43228Ea874246E5716AFE69dD781c6Ff58";
+const USERNAMEREGISTRY_CONTRACT="0xA4Eb7E5Ba2FfE85884EC85b3d31C72E1214e6f2E";
 
-const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
-const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const BALANCE_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const FUNDRAISING_CONTRACT="0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const USERNAMEREGISTRY_CONTRACT="0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
+// const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+// const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+// const FUNDRAISING_CONTRACT="0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// const USERNAMEREGISTRY_CONTRACT="0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
 
 let provider=undefined
@@ -211,11 +209,6 @@ export class Device {
     return await this.deviceContract.owner();
   }
 
-  async getBalanceDevice() {
-    const balance = await this.deviceContract.getBalanceDevice();
-    return ethers.formatEther(balance);
-  }
-
   async addActionListener() {}
 
   async addAction(name, unit, price) {
@@ -224,13 +217,6 @@ export class Device {
     } catch (e) {
       alert(e);
     }
-  }
-
-  async getBalanceUser() {
-    const balance = await this.deviceContract.getBalanceUser(
-      ethers.getAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-    );
-    return ethers.formatEther(balance);
   }
 
   async sendFunds(amount) {
@@ -357,38 +343,6 @@ export class Action {
   }
 }
 
-export class Balance {
-  async initialize() {
-    this.signer = await provider.getSigner();
-    this.balanceContract = new ethers.Contract(
-      BALANCE_CONTRACT,
-      balanceABI.abi,
-      this.signer
-    );
-  }
-
-  async getBalance() {
-    return (await this.balanceContract.getBalance(this.signer)).toString();
-  }
-  async deposit(amount) {
-    try {
-      const tx = await this.signer.sendTransaction({
-        to: BALANCE_CONTRACT,
-        value: amount,
-      });
-    } catch (e) {
-      alert(e);
-    }
-  }
-
-  async withdraw(amount) {
-    try {
-      await this.balanceContract.withdraw(amount);
-    } catch (e) {
-      alert(e);
-    }
-  }
-}
 
 
 export class FundRaising {
