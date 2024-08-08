@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Modal, Input, Alert, FloatButton, Spin } from 'antd';
+import { Button, Modal, Input, Alert, FloatButton, Spin,Typography } from 'antd';
 import { DeviceFactory } from '../web3/contracts';
 import { DynamicCardsDevice } from "./DynamicCardsDevice";
 import { PlusOutlined } from '@ant-design/icons';
 import { getRandomColors } from "../utils";
+import { useNavigate } from 'react-router-dom';
 
-export function Devices() {
+const { Title } = Typography;
+
+export function Devices({setOpenDrawer}) {
     const [devices, setDevices] = useState([]);
     const [deviceName, setDeviceName] = useState('');
     const [alertMessage, setAlertMessage] = useState(null);
@@ -20,6 +23,7 @@ export function Devices() {
     const [loading, setLoading] = useState(false);
 
     const deviceFactory = new DeviceFactory();
+    const navigate=useNavigate();
 
     const getDevices = async () => {
         try {
@@ -88,7 +92,9 @@ export function Devices() {
 
     return (
         <div>
-            <h2 style={{textAlign: "center"}}>All Devices from Organization: <span>{localStorage.orgname}</span></h2>
+
+            <Title style={{textAlign: "center"}} level={1}>All Devices from Organization: <span>{localStorage.orgname}</span></Title>
+            
             <div style={{ position: 'fixed', top: '50px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
                 {loading && <Spin size="large" />}
             </div>
@@ -123,14 +129,11 @@ export function Devices() {
                 </>
             ) : (
                 <div style={{ textAlign: 'center', marginTop: '50px' }}>
-                    <h2>Sie sind keiner Organisation zugeordnet.</h2>
-                    <p>Um Geräte zu verwalten, müssen Sie entweder eine eigene Organisation erstellen oder einer bestehenden Organisation beitreten.</p>
+                    <h2>You are in no organization</h2>
+                    <p>To edit or generate devices you have to create or enter an existing organization</p>
                     <div style={{ marginTop: '20px' }}>
-                        <Button type="primary" style={{ marginRight: '10px' }}>
-                            Eigene Organisation erstellen
-                        </Button>
-                        <Button type="default">
-                            Einer Organisation beitreten
+                        <Button type="primary" style={{ marginRight: '10px' }} onClick={()=>{navigate("/organizations")}}>
+                            Go to organizations
                         </Button>
                     </div>
                 </div>

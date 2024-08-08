@@ -30,15 +30,7 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
     actionFactory.setActionListenerPayed(eventcallback);
   };
 
-  const payActionWithBalance = async () => {
-    setShowAlterMessage(false);
-    await action.initialize(currrentAction.ActionAddress);
-    await action.payAction(1);
-    setOpen(false);
-    setLoading(true);
-    setAlertMessage(`Action with Name: ${currrentAction.name} received payment from Balance`);
-    actionFactory.setActionListenerPayed(eventcallback);
-  };
+
 
   const createCampaign = async () => {
     setShowAlterMessage(false);
@@ -116,8 +108,8 @@ export const PaymentModal = ({ open, currrentAction, setOpen, eventcallback, set
           marginTop: "20px",
         }}
       >
-        <Button type='primary' onClick={payAction}>Pay Action with Wallet</Button>
-        <Button type='primary' onClick={payActionWithBalance}>Pay Action with Balance</Button>
+        <Button type='primary' onClick={payAction}>Pay Action </Button>
+
       </div>
 
       <br /><hr /><br />

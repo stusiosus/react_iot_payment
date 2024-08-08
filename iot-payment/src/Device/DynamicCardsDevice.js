@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Modal, Button,Input,Space,Spin } from "antd";
+import { Card, Col, Row, Modal, Button,Input,Space,Spin,Typography } from "antd";
 import { useNavigate } from "react-router-dom";
 import { Device, DeviceFactory } from "../web3/contracts"; // Adjust the import according to your project structure
 import { splititemsIntoGroups, getRandomColors } from "../utils"; // Ensure these utilities are defined
+
+
+
+const {Title}= Typography;
 
 export function DynamicCardsDevice({ items, eventcallback,setAlertMessage,setShowAlterMessage,setLoading }) {
   const [currentDevice, setCurrentDevice] = useState(null);
@@ -65,7 +69,9 @@ export function DynamicCardsDevice({ items, eventcallback,setAlertMessage,setSho
   const updateDeviceName = async () => {
     await deviceFactory.initialize();
     await deviceFactory.updateDeviceName(currentDevice.id,newDeviceName);
-    deviceFactory.setDeviceListener();
+    setLoading(true);
+    setAlertMessage(`${currentDevice.name} was was updated to ${newDeviceName}`);
+    deviceFactory.setDeviceListenerUpdate(eventcallback);
     setOpenModal(false);
   };
   const isAdmin = localStorage.getItem("isAdmin") === "true";

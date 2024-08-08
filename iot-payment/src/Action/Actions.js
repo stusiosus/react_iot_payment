@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { ActionFactory, Device } from "../web3/contracts";
 import React from "react";
-import { Button, Modal, Input, Alert,FloatButton,Spin } from "antd";
+import { Button, Modal, Input, Alert,FloatButton,Spin,Typography } from "antd";
 import { DynamicCardsAction } from "./DynamicCardsAction";
 import { useLocation } from "react-router-dom";
 import { PlusOutlined } from '@ant-design/icons';
 import { getRandomColors } from "../utils";
 
+const {Title}= Typography;
 
 export function Actions() {
   const device = useLocation().state;
@@ -81,7 +82,8 @@ export function Actions() {
   return (
 
     <div>
-      <h2 style={{textAlign: "center"}}>All Actions from Device: {device.deviceName}</h2>
+      <Title style={{textAlign: "center"}}>All Actions from Device: {device.deviceName}</Title>
+
         <div style={{ position: 'fixed', top: '50px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
                 {loading && <Spin size="large" />}
             </div>

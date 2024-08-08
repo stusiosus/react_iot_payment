@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Card, List } from 'antd';
+import { Card, List,Typography } from 'antd';
 import { Campaign, UsernameRegistry } from '../web3/contracts';
+
+const {Title}=Typography;
 
 const CampaignDonations = () => {
   const location = useLocation();
@@ -55,7 +57,8 @@ const CampaignDonations = () => {
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
-      <h2>{`Donations for ${campaign[2]}`}</h2>
+      <Title>{`Donations for ${campaign[2]}`}</Title>
+   
       <p>{`Total Amount Contributed: ${campaign[5]} /  from target Amount : ${campaign[6]}`}</p>
       <p>{`Your Total Contribution: ${ownContribution || '0'} `}</p>
       <List

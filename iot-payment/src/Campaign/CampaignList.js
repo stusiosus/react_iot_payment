@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Progress, Button, Space, Input, Spin, Modal } from 'antd';
+import { Card, Progress, Button, Space, Input, Spin, Modal,Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { Campaign, FundRaising,UsernameRegistry } from '../web3/contracts';
 import { DynamicCardsCampaign } from './DynamicCardsCampaign';
 import { getRandomColors } from '../utils';
 import QRCode from 'qrcode.react';
 import { parse, build } from 'eth-url-parser';
+
+const {Title}=Typography;
 
 const CampaignList = () => {
   const [campaigns, setCampaigns] = useState([]);
@@ -94,7 +96,8 @@ const CampaignList = () => {
     setUsername(username);
     setSelectedCampaign(_campaign);
     await campaignContract.initialize(_campaign.campaignAddress);
-    
+    campaignContract.addContributedListener(listCampaigns);
+    campaignContract.addContributedListener(()=>{setSelectedCampaign(selectedCampaign)});
   };
 
   const handleDonationsClick = () => {
@@ -152,9 +155,11 @@ const CampaignList = () => {
 
   return (
     <div>
-      <h2 style={{ textAlign: 'center' }}>
-        All Campaigns from Organization: <span>{localStorage.orgname}</span>
-      </h2>
+      <div style={{ textAlign: 'center' }}>
+        <Title >All Campaigns from Organization: <span>{localStorage.orgname}</span></Title>
+        
+        </div>
+        <br></br>
       <div style={{ position: 'fixed', top: '50px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999 }}>
         {loading && <Spin size='large' />}
       </div>
@@ -215,18 +220,20 @@ const CampaignList = () => {
 
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "10px",
-              marginTop: "20px",
+            
+              textAlign: 'center'
             }}
           >
+             <br></br>
             <span>Scan Code or enter Fund Amount and then scan the code for sending the exact Amount</span>
+            <div style={{textAlign: 'center'}}>
+              <br></br>
             {!fundAmount ? (
               <QRCode value={selectedCampaign ? selectedCampaign.campaignAddress : ""} />
             ) : (
               <QRCode value={selectedCampaign ? QRCodePayment : ""} />
             )}
+          </div>
           </div>
           <br />
 

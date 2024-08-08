@@ -2,8 +2,6 @@
 pragma solidity ^0.8.19;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Device.sol";
-import "./ActionFactory.sol";
-import "./Balance.sol";
 import "hardhat/console.sol";
 
 contract Action is Ownable {
@@ -15,14 +13,9 @@ contract Action is Ownable {
 
     Device public device;
 
-    Balance private balance;
 
     ActionFactory private actionFactory;
 
-    modifier checkEnoughBalance() {
-        require(balance.getBalance(msg.sender) >= pricePerUnit, "Insufficient Balance");
-        _;
-    }
 
     receive() external payable {
         if (msg.value < pricePerUnit) {
@@ -34,13 +27,12 @@ contract Action is Ownable {
         actionFactory.logPayedAction(address(this), id, name, msg.value / pricePerUnit);
     }
 
-    constructor(uint256 _id, string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress, address payable _balanceAddress) Ownable(msg.sender) {
+    constructor(uint256 _id, string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress) Ownable(msg.sender) {
         id = _id;
         name = _name;
         unit = _unit;
         pricePerUnit = _pricePerUnit;
         device = Device(_deviceAddress);
-        balance = Balance(_balanceAddress);
         actionFactory = ActionFactory(msg.sender);
     }
 
@@ -56,15 +48,6 @@ contract Action is Ownable {
         unit = _unit;
     }
 
-    function payActionWithBalance(uint256 _amount) external checkEnoughBalance {
-        bool success = actionFactory.Balancetransfer(id, msg.sender, device.owner(), _amount * pricePerUnit);
-        require(success, "Transfer failed");
-        actionFactory.logPayedAction(address(this), id, name, _amount);
-    }
-
-    function possibleActionsAmount() public view returns (uint256) {
-        return balance.getBalance(msg.sender) / pricePerUnit;
-    }
 
     function getPricePerUnit() public view returns (uint256) {
         return pricePerUnit;

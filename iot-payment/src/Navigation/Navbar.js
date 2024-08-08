@@ -8,16 +8,13 @@ import OrganizationsDrawer from "./OrganizationsDrawer";
 export default function Navbar() {
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
-  const [userBalance, setUserBalance] = useState(0);
-  const [depositAmount, setDepositAmount] = useState(0);
-  const [withdrawAmount, setWithdrawAmount] = useState(0);
+
   const [username, setUsername] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [placement, setPlacement] = useState("left");
   const [isUsernameSet, setIsUsernameSet] = useState(false);
 
-  const balance = new Balance();
   const usernameRegistry = new UsernameRegistry(provider);
 
   const showDrawer = () => {
@@ -51,23 +48,7 @@ export default function Navbar() {
     setSigner(signer);
   }
 
-  async function getBalance() {
-    await balance.initialize();
-    const balanceValue = await balance.getBalance(signer.address);
-    setUserBalance(balanceValue);
-  }
-
-  async function deposit() {
-    await balance.initialize();
-    await balance.deposit(depositAmount);
-    await getBalance();
-  }
-
-  async function withdraw() {
-    await balance.initialize();
-    await balance.withdraw(withdrawAmount);
-    await getBalance();
-  }
+ 
 
   async function getUsername() {
     await usernameRegistry.initialize();
@@ -83,11 +64,14 @@ export default function Navbar() {
   }
 
   async function updateUsername(newUsername) {
+
     await usernameRegistry.initialize();
-    if (isUsernameSet){
+    if (localStorage.userName!=""){
+      console.log(localStorage.userName)
       await usernameRegistry.updateUsername(newUsername);
     }
     else{
+      console.log(localStorage.userName)
       await usernameRegistry.createUsername(newUsername);
     }
     setUsername(newUsername);
@@ -101,7 +85,6 @@ export default function Navbar() {
 
   useEffect(() => {
     if (signer) {
-      getBalance();
       getUsername();
     }
   }, [signer]);
@@ -140,7 +123,7 @@ export default function Navbar() {
         >
           {isUsernameSet && (
             <Button type="primary" shape="round" onClick={showModal}>
-              {`${username} - ${userBalance} ETH`}
+              {`${username} `}
             </Button>
           )}
           {!isUsernameSet && (
@@ -166,29 +149,6 @@ export default function Navbar() {
             </Button>
             </Space>
             <br />
-            <Space direction="vertical" style={{ width: "100%" }}>
-              <Divider />
-              <h4>Enter Deposit Amount</h4>
-              <Input
-                placeholder="Amount to deposit"
-                value={depositAmount}
-                onChange={(e) => setDepositAmount(e.target.value)}
-              />
-              <Button type="primary" onClick={deposit}>
-                Deposit
-              </Button>
-              <Divider />
-              <h4>Enter Withdraw Amount</h4>
-              <Input
-                placeholder="Amount to withdraw"
-                value={withdrawAmount}
-                onChange={(e) => setWithdrawAmount(e.target.value)}
-              />
-              <Button type="primary" onClick={withdraw}>
-                Withdraw
-              </Button>
-              <Divider />
-            </Space>
           
           </Modal>
         </div>
