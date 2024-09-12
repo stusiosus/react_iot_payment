@@ -17,21 +17,14 @@ import {
   Campaign,
   FundRaising,
 } from "../web3/contracts";
-import { useNavigate } from "react-router-dom";
 
 export default function OrganizationList({ organizations, loadOrganizations }) {
-
   const organizationFactory = new OrganizationFactory();
   const organizationContract = new Organization();
-  const [organizationName, setOrganizationName] = useState(null);
   const [organization, setOrganization] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [revieverAddress, setRecieverAddress] = useState(null);
   const [mintAdmin, setMintAmin] = useState(1);
-  const [addOrganisationAddress, setAddOrganisationAddress] = useState(null);
-  const [campaigns, setCampaigns] = useState([]);
-  const navigate = useNavigate();
-
 
   const selectOrganisation = async (org) => {
     setOrganization(org);
@@ -50,22 +43,22 @@ export default function OrganizationList({ organizations, loadOrganizations }) {
     organizationFactory.setOrganizationListenerRemove(loadOrganizations);
   };
 
-  async function isAdmin(org){
+  async function isAdmin(org) {
     await organizationContract.initialize(org.NFTAddress);
     return await organizationContract.isAdmin();
   }
-  const mintOrganizationNFT=async ()=>{
-
+  const mintOrganizationNFT = async () => {
     await organizationContract.initialize(organization.NFTAddress);
-    await organizationContract.mintOrganizationToken(revieverAddress,mintAdmin)
-  }
+    await organizationContract.mintOrganizationToken(
+      revieverAddress,
+      mintAdmin
+    );
+  };
   async function showModal(organisation) {
-
     setOrganization(organisation);
     setOpenModal(true);
   }
-  
- 
+
   const handleOk = async () => {
     setOpenModal(false);
   };
@@ -74,10 +67,8 @@ export default function OrganizationList({ organizations, loadOrganizations }) {
     setOpenModal(false);
   };
   const onChange = (e) => {
-   
     setMintAmin(e.target.value);
   };
-
 
   return (
     <div>
@@ -103,15 +94,15 @@ export default function OrganizationList({ organizations, loadOrganizations }) {
         <br></br>
         <br></br>
         <Radio.Group onChange={onChange} value={mintAdmin}>
-          <Radio value={1}>create User Organisation NFT</Radio>
-          <Radio value={0}>create Admin Organisation NFT</Radio>
+          <Radio value={1}>create User Organization NFT</Radio>
+          <Radio value={0}>create Admin Organization NFT</Radio>
         </Radio.Group>
         <br></br>
         <br></br>
         <Button type="primary" shape="round" onClick={mintOrganizationNFT}>
           {mintAdmin == 0
-            ? "Send User NFT for Organisation Reading Access"
-            : "Send Amin NFT for Organisation Writing Access"}
+            ? "Send User NFT for Organization Writing Access"
+            : "Send Amin NFT for Organization Reading Access"}
         </Button>
         <br></br>
         <br></br>
@@ -133,12 +124,9 @@ export default function OrganizationList({ organizations, loadOrganizations }) {
                 key={`${org.id}-select`}
                 onClick={() => selectOrganisation(org)}
               >
-                Select
+                Change to
               </Button>,
-              <Button
-                key={`${org.id}-edit`}
-                onClick={() => showModal(org)}
-              >
+              <Button key={`${org.id}-edit`} onClick={() => showModal(org)}>
                 edit
               </Button>,
             ]}

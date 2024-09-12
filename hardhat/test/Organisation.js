@@ -13,7 +13,9 @@ describe("OrganizationFactory", function () {
     Organization = await ethers.getContractFactory("Organization");
 
     // Deploy the OrganizationFactory contract
-    OrganizationFactory = await ethers.getContractFactory("OrganizationFactory");
+    OrganizationFactory = await ethers.getContractFactory(
+      "OrganizationFactory"
+    );
     organizationFactory = await OrganizationFactory.deploy();
     await organizationFactory.deployed();
   });
@@ -21,25 +23,31 @@ describe("OrganizationFactory", function () {
   it("should create a new Organization and mint an Admin NFT", async function () {
     const tx = await organizationFactory.createOrganization("TestOrg");
     const receipt = await tx.wait();
-    const event = receipt.events.find(event => event.event === "AdminNFTMinted");
+    const event = receipt.events.find(
+      (event) => event.event === "AdminNFTMinted"
+    );
 
     const organizationAddress = event.args[1];
 
-    const organization = await ethers.getContractAt("Organization", organizationAddress);
-   
+    const organization = await ethers.getContractAt(
+      "Organization",
+      organizationAddress
+    );
+
     const isAdmin = await organization.isAdmin(owner.address);
 
     expect(isAdmin).to.be.true;
-});
-
-
-
+  });
 
   it("should allow the owner to mint a User NFT", async function () {
     // Create organization and mint Admin NFT
-    const organizationTx = await organizationFactory.createOrganization("TestOrg");
+    const organizationTx = await organizationFactory.createOrganization(
+      "TestOrg"
+    );
     const receipt = await organizationTx.wait();
-    const organizationAddress = receipt.events.find(event => event.event === "AdminNFTMinted").args[1];
+    const organizationAddress = receipt.events.find(
+      (event) => event.event === "AdminNFTMinted"
+    ).args[1];
 
     // Attach the deployed organization contract
     organization = await Organization.attach(organizationAddress);
@@ -54,24 +62,34 @@ describe("OrganizationFactory", function () {
 
   it("should add an existing Organization to a user", async function () {
     // Create organization and mint Admin NFT
-    const organizationTx = await organizationFactory.createOrganization("TestOrg");
+    const organizationTx = await organizationFactory.createOrganization(
+      "TestOrg"
+    );
     const receipt = await organizationTx.wait();
-    const organizationAddress = receipt.events.find(event => event.event === "AdminNFTMinted").args[1];
+    const organizationAddress = receipt.events.find(
+      (event) => event.event === "AdminNFTMinted"
+    ).args[1];
 
     // Attach the deployed organization contract
     organization = await Organization.attach(organizationAddress);
 
     // Transfer Admin NFT to addr1
-    await organization["safeTransferFrom(address,address,uint256)"](owner.address, addr1.address, 1);
+    await organization["safeTransferFrom(address,address,uint256)"](
+      owner.address,
+      addr1.address,
+      1
+    );
 
     // Add the organization for addr1
-    await organizationFactory.connect(addr1).addOrganization(organizationAddress);
+    await organizationFactory
+      .connect(addr1)
+      .addOrganization(organizationAddress);
 
     // Retrieve the organizations for addr1
-    const userOrgs = await organizationFactory.connect(addr1).getOrganizations();
+    const userOrgs = await organizationFactory
+      .connect(addr1)
+      .getOrganizations();
     expect(userOrgs.length).to.equal(1);
     expect(userOrgs[0].NFTAddress).to.equal(organizationAddress);
   });
-
-
 });

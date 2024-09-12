@@ -5,57 +5,53 @@ const deviceFactoryAbi = require("../Abi/DeviceFactory.json");
 const actionFactoryAbi = require("../Abi/ActionFactory.json");
 const actionAbi = require("../Abi/Action.json");
 const organizationFactoryABI = require("../Abi/OrganizationFactory.json");
-const organizationABI=require("../Abi/Organization.json");
-const fundraisingABI=require("../Abi/FundRaising.json");
-const campaignABI=require("../Abi/Campaign.json");
-const usernameRegistry=require("../Abi/UsernameRegistry.json")
+const organizationABI = require("../Abi/Organization.json");
+const fundraisingABI = require("../Abi/FundRaising.json");
+const campaignABI = require("../Abi/Campaign.json");
+const usernameRegistry = require("../Abi/UsernameRegistry.json");
 
+const ORGANIZATION_FACTORY_CONTRACT =
+  "0x055bc3f824ea9FFC91713b90bb331629ECA6D9D3";
+const DEVICE_FACTORY_CONTRACT = "0x2eAA9C086968893e289DC8234140A5e59CAEB6c9";
+const ACTION_FACCTORY_CONTRACT = "0xa0381BB6F88b56B00de2dD911Bc08D9E199379dF";
+const FUNDRAISING_CONTRACT = "0x035e0dc992146731256796177FDa10238ec31cb9";
+const USERNAMEREGISTRY_CONTRACT = "0x70dA59bDd5e8Fb49f9cd8C8030016d9628Bab5fa";
 
-const ORGANIZATION_FACTORY_CONTRACT = "0x13D44d4F90bB84584FD1EBf5dFd7C9c83f31f137";
-const DEVICE_FACTORY_CONTRACT = "0x1a03d8D3bcAe7d0214c4A44496E9a923399cd706";
-const ACTION_FACCTORY_CONTRACT = "0x8dB51b735a557819D3f6aa26FB858a86F0026672";
-const FUNDRAISING_CONTRACT="0x7BfFDB43228Ea874246E5716AFE69dD781c6Ff58";
-const USERNAMEREGISTRY_CONTRACT="0xA4Eb7E5Ba2FfE85884EC85b3d31C72E1214e6f2E";
-
-// const ORGANIZATION_FACTORY_CONTRACT = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// const ORGANIZATION_FACTORY_CONTRACT =
+//   "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 // const DEVICE_FACTORY_CONTRACT = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 // const ACTION_FACCTORY_CONTRACT = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-// const FUNDRAISING_CONTRACT="0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-// const USERNAMEREGISTRY_CONTRACT="0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
+// const FUNDRAISING_CONTRACT = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// const USERNAMEREGISTRY_CONTRACT = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
+let provider = undefined;
 
-let provider=undefined
+try {
+  provider = new ethers.BrowserProvider(window.ethereum, "any");
+} catch {
+  console.log("no provider was found");
+}
 
-try{provider = new ethers.BrowserProvider(window.ethereum, "any");}
-
-catch{console.log("no provider was found")}
-
-
-async function setProvider(){
-  
+async function setProvider() {
   let provider = new ethers.BrowserProvider(window.ethereum, "any");
-  const add=(await provider.getSigner()).address;
+  const add = (await provider.getSigner()).address;
 
-  if (localStorage.signerAddress!=add)
-  {
+  if (localStorage.signerAddress != add) {
     localStorage.removeItem("orgid");
     localStorage.removeItem("orgname");
     localStorage.removeItem("orgaddresse");
   }
 
-  localStorage.setItem("signerAddress",add);
+  localStorage.setItem("signerAddress", add);
 }
 setProvider();
 
-
-
-export class OrganizationFactory{
-
-  constructor(){}
+export class OrganizationFactory {
+  constructor() {}
 
   async initialize() {
     this.signer = await provider.getSigner();
-    console.log(this.signer.address)
+    console.log(this.signer.address);
     this.organizationFactoryContract = new ethers.Contract(
       ORGANIZATION_FACTORY_CONTRACT,
       organizationFactoryABI.abi,
@@ -63,46 +59,53 @@ export class OrganizationFactory{
     );
   }
 
-  async createOrganization(name){
+  async createOrganization(name) {
     await this.organizationFactoryContract.createOrganization(name.toString());
   }
-  async getOrganizations(){
-    try{return await this.organizationFactoryContract.getOrganizations();}
-    catch (e){
+  async getOrganizations() {
+    try {
+      return await this.organizationFactoryContract.getOrganizations();
+    } catch (e) {
       alert(e);
     }
   }
-  async addOrganization(address){
+  async addOrganization(address) {
     await this.organizationFactoryContract.addOrganization(address);
   }
-  removeOrganization
- 
-  async removeOrganization(address){
+  removeOrganization;
+
+  async removeOrganization(address) {
     await this.organizationFactoryContract.removeOrganization(address);
   }
 
- setOrganizationListenerCreate(callback) {
-    this.organizationFactoryContract.on("OrganizationCreated", (id, name, creator) => {
-      callback();
-    });
+  setOrganizationListenerCreate(callback) {
+    this.organizationFactoryContract.on(
+      "OrganizationCreated",
+      (id, name, creator) => {
+        callback();
+      }
+    );
   }
   setOrganizationListenerAdd(callback) {
-    this.organizationFactoryContract.on("OrganizationAdded", (user,organizatioonAddress) => {
-      callback();
-    });
+    this.organizationFactoryContract.on(
+      "OrganizationAdded",
+      (user, organizatioonAddress) => {
+        callback();
+      }
+    );
   }
   setOrganizationListenerRemove(callback) {
-    this.organizationFactoryContract.on("OrganizationRemoved", (user,organizatioonAddress) => {
-      callback();
-    });
+    this.organizationFactoryContract.on(
+      "OrganizationRemoved",
+      (user, organizatioonAddress) => {
+        callback();
+      }
+    );
   }
-
-
 }
 
-export class Organization{
-
-  constructor(){}
+export class Organization {
+  constructor() {}
 
   async initialize(organisationAddress) {
     this.signer = await provider.getSigner();
@@ -113,20 +116,17 @@ export class Organization{
     );
   }
 
-  async mintOrganizationToken(recieverAddress,status){
-    try{
-      await this.organizationContract.mint(recieverAddress,status);
-    }
-    catch (e){
-      alert(e)
+  async mintOrganizationToken(recieverAddress, status) {
+    try {
+      await this.organizationContract.mint(recieverAddress, status);
+    } catch (e) {
+      alert(e);
     }
   }
-  async isAdmin(){
+  async isAdmin() {
     return this.organizationContract.isAdmin(this.signer.address);
   }
-
 }
-
 
 export class DeviceFactory {
   constructor() {
@@ -143,29 +143,30 @@ export class DeviceFactory {
   }
 
   async getDevices() {
-    const address=localStorage.orgaddresse;
+    const address = localStorage.orgaddresse;
 
-    if (localStorage.orgaddresse){
-      
+    if (localStorage.orgaddresse) {
       return await this.deviceFactoryContract.getDevices(address);
-    }
-    else{
+    } else {
       return [];
     }
   }
 
   setDeviceListenerCreate(callback) {
-    this.deviceFactoryContract.on("DeviceCreated", (action, id, name, factoryaddress) => {
-      callback();
-    });
+    this.deviceFactoryContract.on(
+      "DeviceCreated",
+      (action, id, name, factoryaddress) => {
+        callback();
+      }
+    );
   }
   setDeviceListenerUpdate(callback) {
-    this.deviceFactoryContract.on("DeviceUpdated", ( id,newName) => {
+    this.deviceFactoryContract.on("DeviceUpdated", (id, newName) => {
       callback();
     });
   }
   setDeviceListenerDelete(callback) {
-    this.deviceFactoryContract.on("DeviceDeleted", ( id) => {
+    this.deviceFactoryContract.on("DeviceDeleted", (id) => {
       callback();
     });
   }
@@ -182,13 +183,12 @@ export class DeviceFactory {
       throw error;
     }
   };
-  async deleteDevice(deviceId){
+  async deleteDevice(deviceId) {
     await this.deviceFactoryContract.deleteDevice(deviceId);
   }
-  async updateDeviceName(deviceId,newName){
-    await this.deviceFactoryContract.updateDeviceName(deviceId,newName);
+  async updateDeviceName(deviceId, newName) {
+    await this.deviceFactoryContract.updateDeviceName(deviceId, newName);
   }
-  
 }
 
 export class Device {
@@ -251,7 +251,6 @@ export class ActionFactory {
       deviceAddress
     );
     var cleanedResults = [];
-  
 
     for (var i in rawActions) {
       if (rawActions[i].deviceAddress.toString() == deviceAddress.toString()) {
@@ -268,26 +267,21 @@ export class ActionFactory {
     );
   }
   async updateActionName(actionId, newname) {
-    await this.actionFactoryContract.updateActionName(
-      actionId,
-     newname
-    );
+    await this.actionFactoryContract.updateActionName(actionId, newname);
   }
   async updateActionUnit(actionId, newUnit) {
-    await this.actionFactoryContract.updateActionUnit(
-      actionId,
-      newUnit
-    );
+    await this.actionFactoryContract.updateActionUnit(actionId, newUnit);
   }
-  async deleteAction(actionId){
-    await this.actionFactoryContract.deleteAction(
-      actionId
-    );
+  async deleteAction(actionId) {
+    await this.actionFactoryContract.deleteAction(actionId);
   }
   setActionListenerCreate(callback) {
-    this.actionFactoryContract.on("ActionCreated", (action, id, name, unit,deviceAddress,_organisationAddress) => {
-      callback();
-    });
+    this.actionFactoryContract.on(
+      "ActionCreated",
+      (action, id, name, unit, deviceAddress, _organisationAddress) => {
+        callback();
+      }
+    );
   }
   setActionListenerDelete(callback) {
     this.actionFactoryContract.on("ActionDeleted", (id) => {
@@ -295,23 +289,28 @@ export class ActionFactory {
     });
   }
   setActionListenerUpdate(callback) {
-    this.actionFactoryContract.on("ActionUpdated", (id,newName,newUnit,newPrice) => {
-      callback();
-    });
+    this.actionFactoryContract.on(
+      "ActionUpdated",
+      (id, newName, newUnit, newPrice) => {
+        callback();
+      }
+    );
   }
 
   setActionListenerPayed(callback) {
-    this.actionFactoryContract.on("PayedAction", (actionaddress,id,name,amount) => {
-      callback();
-    });
+    this.actionFactoryContract.on(
+      "PayedAction",
+      (actionaddress, id, name, amount) => {
+        callback();
+      }
+    );
   }
 }
 
 export class Action {
-
   async initialize(address) {
     this.signer = await provider.getSigner();
-    this.address=address;
+    this.address = address;
 
     this.actionContract = new ethers.Contract(
       address,
@@ -320,21 +319,21 @@ export class Action {
     );
   }
 
-  async payActionInstant(amount){
+  async payActionInstant(amount) {
     try {
       const tx = await this.signer.sendTransaction({
         to: this.address,
-        value:(amount).toString(),
+        value: amount.toString(),
       });
     } catch (e) {
       alert(e);
     }
   }
-  async payAction(amount){
-   await this.actionContract.payAction(amount);
+  async payAction(amount) {
+    await this.actionContract.payAction(amount);
   }
 
-  async possibleActionsAmount(){
+  async possibleActionsAmount() {
     return await this.actionContract.possibleActionsAmount();
   }
 
@@ -342,8 +341,6 @@ export class Action {
     return await this.actionContract.setPrice(price);
   }
 }
-
-
 
 export class FundRaising {
   async initialize() {
@@ -355,20 +352,36 @@ export class FundRaising {
     );
   }
 
-  async createCampaign(description,organization,action,duration,amount) {
-    await this.FundRaisingContract.createCampaign(description,organization,action,duration,amount)
+  async createCampaign(description, organization, action, duration, amount) {
+    await this.FundRaisingContract.createCampaign(
+      description,
+      organization,
+      action,
+      duration,
+      amount
+    );
   }
   async getCampaignsByOrganization(organization) {
-   return  await this.FundRaisingContract.getCampaignsByOrganization(organization);  
-  }
- 
-  setCampaignListenerCreate(callback) {
-    this.FundRaisingContract.on("CampaignCreated", (campaignId,campaignaddress,description,organizationAddress,duration,targetAmount
-    ) => {
-      callback();
-    });
+    return await this.FundRaisingContract.getCampaignsByOrganization(
+      organization
+    );
   }
 
+  setCampaignListenerCreate(callback) {
+    this.FundRaisingContract.on(
+      "CampaignCreated",
+      (
+        campaignId,
+        campaignaddress,
+        description,
+        organizationAddress,
+        duration,
+        targetAmount
+      ) => {
+        callback();
+      }
+    );
+  }
 }
 
 export class Campaign {
@@ -381,9 +394,7 @@ export class Campaign {
     );
   }
 
- 
   async sendFunds(amount) {
-    
     try {
       const tx = await this.signer.sendTransaction({
         to: this.CampaignContract,
@@ -392,10 +403,10 @@ export class Campaign {
     } catch (e) {
       alert(e);
     }
-  };
-  async endCampaign(){
+  }
+  async endCampaign() {
     await this.CampaignContract.endCampaign();
-  };
+  }
 
   addContributedListener(callback) {
     this.CampaignContract.on("Contributed", (contributor, amount) => {
@@ -403,36 +414,43 @@ export class Campaign {
     });
   }
 
-  async getContributions()  {
-    const contributions=await this.CampaignContract.getContributions(this.signer.address);
+  async getContributions() {
+    const contributions = await this.CampaignContract.getContributions(
+      this.signer.address
+    );
 
-    return contributions.toString()
+    return contributions.toString();
   }
 
-  
-  async  getAllContributedEvents() {
+  async getAllContributedEvents() {
     try {
       const filter = this.CampaignContract.filters.Contributed();
 
-      const events = await this.CampaignContract.queryFilter(filter, 0, 'latest');
-      let event_list=[]
-    
-      events.forEach(event =>{
-          const { contributor, amount } = event.args;
+      const events = await this.CampaignContract.queryFilter(
+        filter,
+        0,
+        "latest"
+      );
+      let event_list = [];
 
-          event_list.push( event.args)
-          console.log(`Contributor: ${contributor}, Amount: ${ethers.formatEther(amount)} ETH`);
+      events.forEach((event) => {
+        const { contributor, amount } = event.args;
+
+        event_list.push(event.args);
+        console.log(
+          `Contributor: ${contributor}, Amount: ${ethers.formatEther(
+            amount
+          )} ETH`
+        );
       });
-      return event_list
-  } catch (error) {
-      console.error('Error fetching events:', error);
+      return event_list;
+    } catch (error) {
+      console.error("Error fetching events:", error);
+    }
   }
 }
 
-}
-
-export class UsernameRegistry{
-
+export class UsernameRegistry {
   async initialize() {
     this.signer = await provider.getSigner();
     this.usernameRegestry = new ethers.Contract(
@@ -442,21 +460,17 @@ export class UsernameRegistry{
     );
   }
 
-  async createUsername(username){
-    await this.usernameRegestry.createUsername(username)
+  async createUsername(username) {
+    await this.usernameRegestry.createUsername(username);
   }
-  async updateUsername(newUsername){
-    await this.usernameRegestry.updateUsername(newUsername)
+  async updateUsername(newUsername) {
+    await this.usernameRegestry.updateUsername(newUsername);
   }
-  async getUsername(useraddress){
-
-    try{    
-      return await this.usernameRegestry.getUsername(useraddress)
+  async getUsername(useraddress) {
+    try {
+      return await this.usernameRegestry.getUsername(useraddress);
+    } catch {
+      return "";
     }
-
-  catch{
-    return ""
   }
-  }
-
 }

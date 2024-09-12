@@ -1,36 +1,54 @@
 const { ethers } = require("hardhat");
-const mqtt = require("mqtt");
 
-const ACTIONFACTORY="0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const CAMPAIGN="0x61c36a8d610163660E21a8b7359e1Cac0C9133e1";
+const ACTIONFACTORY_ADDRESS = "0xa0381BB6F88b56B00de2dD911Bc08D9E199379dF";
+const CAMPAIGN_ADDRESS = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const SEPOLIAURL =
+  "https://sepolia.infura.io/v3/02d0f5491c014e48948a672fdd810490";
 
+async function main() {
+  // Sepolia-Provider verwenden
+  const provider = new ethers.providers.JsonRpcProvider(SEPOLIAURL);
 
-async function main(){
+  const ActionFactory = await ethers.getContractFactory("ActionFactory");
+  const actionFactory = ActionFactory.attach(ACTIONFACTORY_ADDRESS).connect(
+    provider
+  );
 
-    const ActionFactory= await ethers.getContractFactory("ActionFactory");
-    const actionFactory=  ActionFactory.attach(ACTIONFACTORY);
+  const Campaign = await ethers.getContractFactory("Campaign");
+  const campaign = Campaign.attach(CAMPAIGN_ADDRESS).connect(provider);
 
-    const Campaign=await ethers.getContractFactory("Campaign"); 
-    const campaign=Campaign.attach(CAMPAIGN);
-    
-    actionFactory.on("PayedAction",(actionAddress,id,name,amount)=>{
-    
-        console.log(actionAddress);
-        console.log(id);
-        console.log(name);
-        console.log(amount);
-    
-    })
+  // Event Listener für PayedAction hinzufügen
+  actionFactory.on("PayedAction", (actionAddress, id, name, amount) => {
+    console.log(`PayedAction event detected:`);
+    console.log(`Action Address: ${actionAddress}`);
+    console.log(`ID: ${id.toString()}`);
+    console.log(`Name: ${name}`);
+    console.log(`Amount: ${ethers.utils.formatEther(amount)} ETH`);
+  });
 
-    campaign.on("CampaignEnded",(successfull)=>{
+  // Event Listener für CampaignEnded hinzufügen
+  campaign.on("CampaignEnded", (successful) => {
+    console.log(`CampaignEnded event detected: Successful = ${successful}`);
+  });
 
-        console.log(successfull);
-    })
+  // Event Listener für ContributionsRefunded hinzufügen
+  campaign.on("ContributionsRefunded", () => {
+    console.log(
+      "ContributionsRefunded event detected: Contributions were refunded"
+    );
+  });
 
-    campaign.on("ContributionsRefunded",()=>{
+  console.log("Listening for events...");
 
-        console.log("ContributionsRefunded was successfull");
-    })
+  // Keep the process running
+  process.stdin.resume();
 }
 
-main();
+main()
+  .then(() => {
+    console.log("Setup complete.");
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });

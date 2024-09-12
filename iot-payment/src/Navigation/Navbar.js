@@ -4,6 +4,7 @@ import { Button, Space, Modal, Input, Divider } from "antd";
 import { Balance } from "../web3/contracts";
 import { UsernameRegistry } from "../web3/contracts";
 import OrganizationsDrawer from "./OrganizationsDrawer";
+import { MenuOutlined } from "@ant-design/icons";
 
 export default function Navbar() {
   const [provider, setProvider] = useState(null);
@@ -48,30 +49,26 @@ export default function Navbar() {
     setSigner(signer);
   }
 
- 
-
   async function getUsername() {
     await usernameRegistry.initialize();
     const userAddress = signer ? signer.address : "";
     const fetchedUsername = await usernameRegistry.getUsername(userAddress);
-    if (fetchedUsername!="") {
+    if (fetchedUsername != "") {
       setUsername(fetchedUsername);
       setIsUsernameSet(true);
     } else {
       setIsModalOpen(true);
     }
-    localStorage.userName=fetchedUsername;
+    localStorage.userName = fetchedUsername;
   }
 
   async function updateUsername(newUsername) {
-
     await usernameRegistry.initialize();
-    if (localStorage.userName!=""){
-      console.log(localStorage.userName)
+    if (localStorage.userName != "") {
+      console.log(localStorage.userName);
       await usernameRegistry.updateUsername(newUsername);
-    }
-    else{
-      console.log(localStorage.userName)
+    } else {
+      console.log(localStorage.userName);
       await usernameRegistry.createUsername(newUsername);
     }
     setUsername(newUsername);
@@ -108,7 +105,7 @@ export default function Navbar() {
         }}
       >
         <Button type="primary" shape="round" onClick={showDrawer}>
-          Organization: {localStorage.getItem("orgname") ? localStorage.getItem("orgname") : "No Organization selected"}
+          <MenuOutlined />
         </Button>
       </div>
       <div style={{ backgroundColor: "", height: "100px", zIndex: 1 }}>
@@ -139,17 +136,16 @@ export default function Navbar() {
           >
             <h3>Username Settings</h3>
             <Space>
-            <Input
-              placeholder="Enter new username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
+              <Input
+                placeholder="Enter new username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
               <Button type="primary" onClick={() => updateUsername(username)}>
-              Set New Username
-            </Button>
+                Set New Username
+              </Button>
             </Space>
             <br />
-          
           </Modal>
         </div>
       </div>

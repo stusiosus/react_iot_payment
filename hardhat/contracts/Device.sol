@@ -11,14 +11,16 @@ contract Device is Ownable {
     ActionFactory public actionFactory;
 
     Organization private organization;
+    address deviceFactoryAddress;
 
     mapping(uint256 => address) public actionToDevice;
 
-    constructor(uint256 _id, string memory _name, address _actionFactoryAddress, address _deviceOwner, address _organisationAddress) Ownable(_deviceOwner) {
+    constructor(uint256 _id, string memory _name, address _actionFactoryAddress, address _deviceOwner,address _deviceFactoryAddress, address _organisationAddress) Ownable(_deviceOwner) {
         id = _id;
         name = _name;
         actionFactory = ActionFactory(_actionFactoryAddress);
         organization = Organization(_organisationAddress);
+        deviceFactoryAddress=_deviceFactoryAddress;
     }
 
     function addAction(string memory _name, string memory _unit, uint32 _pricePerUnit) public returns (address) {
@@ -28,7 +30,8 @@ contract Device is Ownable {
         return actionAddress;
     }
 
-    function updateName(string memory _newName) external onlyOwner {
+    function updateName(string memory _newName) external  {
+        require(msg.sender==deviceFactoryAddress, "Only the DeviceFactory is allowed to call this Contract");
         name = _newName;
     }
 

@@ -25,7 +25,7 @@ contract DeviceFactory {
     function createDevice(string memory _name, address _actionFactoryAddress, address _organizationAddress) public returns (address) {
         require(Organization(_organizationAddress).isAdmin(msg.sender), "No AdminNFT -> not allowed to create a Device");
 
-        Device newDevice = new Device(deviceCounter, _name, _actionFactoryAddress, address(this), _organizationAddress);
+        Device newDevice = new Device(deviceCounter, _name, _actionFactoryAddress,msg.sender ,address(this), _organizationAddress);
         emit DeviceCreated(address(newDevice), deviceCounter, _name, _actionFactoryAddress);
 
         Devices[deviceCounter] = DeviceInfo(address(newDevice), deviceCounter, _name, _actionFactoryAddress, _organizationAddress);
