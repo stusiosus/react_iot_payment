@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Action.sol";
 import "./Organization.sol";
 import "hardhat/console.sol";
+import "./Device.sol";
 
 contract ActionFactory is Ownable {
 
@@ -32,6 +33,8 @@ contract ActionFactory is Ownable {
     event InsufficientPayment(address actionAddress, uint256 actionId, address payer, uint256 amountPaid, uint256 pricePerUnit);
 
     function createAction(string memory _name, string memory _unit, uint256 _pricePerUnit, address payable _deviceAddress, address _deviceOwner, address _organisationAddress) public returns (address) {
+        
+        require(msg.sender ==  _deviceAddress,"You are not the Owner of this Device");
         Action newAction = new Action(actionCounter, _name, _unit, _pricePerUnit, _deviceAddress);
         emit ActionCreated(address(newAction), actionCounter, _name, _unit, _pricePerUnit, _deviceAddress, _organisationAddress);
 
@@ -56,6 +59,9 @@ contract ActionFactory is Ownable {
         require(Actions[_actionId].ActionAddress != address(0), "Action does not exist");
         require(Organization(Actions[_actionId].organisationAddress).isAdmin(msg.sender), "No AdminNFT -> not allowed to update the action");
 
+        Device device = Device(Actions[_actionId].deviceAddress);
+        require(msg.sender ==  device.owner(),"You are not the Owner of this Device");
+
         Action action = Action(Actions[_actionId].ActionAddress);
         action.setPrice(_newPrice);
         Actions[_actionId].price = _newPrice;
@@ -66,6 +72,9 @@ contract ActionFactory is Ownable {
     function updateActionName(uint256 _actionId, string memory _newName) public {
         require(Actions[_actionId].ActionAddress != address(0), "Action does not exist");
         require(Organization(Actions[_actionId].organisationAddress).isAdmin(msg.sender), "No AdminNFT -> not allowed to update the action");
+
+        Device device = Device(Actions[_actionId].deviceAddress);
+        require(msg.sender ==  device.owner(),"You are not the Owner of this Device");
 
         Action action = Action(Actions[_actionId].ActionAddress);
         action.setName(_newName);
@@ -78,6 +87,9 @@ contract ActionFactory is Ownable {
         require(Actions[_actionId].ActionAddress != address(0), "Action does not exist");
         require(Organization(Actions[_actionId].organisationAddress).isAdmin(msg.sender), "No AdminNFT -> not allowed to update the action");
 
+        Device device = Device(Actions[_actionId].deviceAddress);
+        require(msg.sender ==  device.owner(),"You are not the Owner of this Device");
+
         Action action = Action(Actions[_actionId].ActionAddress);
         action.setUnit(_newUnit);
         Actions[_actionId].unit = _newUnit;
@@ -88,6 +100,9 @@ contract ActionFactory is Ownable {
     function deleteAction(uint256 _actionId) public {
         require(Actions[_actionId].ActionAddress != address(0), "Action does not exist");
         require(Organization(Actions[_actionId].organisationAddress).isAdmin(msg.sender), "No AdminNFT -> not allowed to delete the action");
+
+        Device device = Device(Actions[_actionId].deviceAddress);
+        require(msg.sender ==  device.owner(),"You are not the Owner of this Device");
 
         delete Actions[_actionId];
 
