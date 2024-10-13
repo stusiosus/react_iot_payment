@@ -6,9 +6,11 @@ contract UsernameRegistry {
     event UsernameCreated(address indexed user, string username);
     event UsernameUpdated(address indexed user, string newUsername);
 
-
     function createUsername(string memory username) external {
-        require(bytes(usernames[msg.sender]).length == 0, "Username already exists");
+        require(
+            bytes(usernames[msg.sender]).length == 0,
+            "Username already exists"
+        );
         require(bytes(username).length > 0, "Username cannot be empty");
 
         usernames[msg.sender] = username;
@@ -16,7 +18,10 @@ contract UsernameRegistry {
     }
 
     function updateUsername(string memory newUsername) external {
-        require(bytes(usernames[msg.sender]).length > 0, "Username does not exist");
+        require(
+            bytes(usernames[msg.sender]).length > 0,
+            "Username does not exist"
+        );
         require(bytes(newUsername).length > 0, "New username cannot be empty");
 
         usernames[msg.sender] = newUsername;

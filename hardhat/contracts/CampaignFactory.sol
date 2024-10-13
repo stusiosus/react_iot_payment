@@ -6,7 +6,7 @@ import "./Action.sol";
 import "./Campaign.sol";
 import "hardhat/console.sol";
 
-contract Fundraising {
+contract CampaignFactory {
     struct CampaignInfo {
         uint256 id;
         address campaignAddress;
@@ -25,31 +25,72 @@ contract Fundraising {
     mapping(uint256 => address) public campaigns;
     mapping(address => uint256[]) public organizationCampaigns;
 
-    event CampaignCreated(uint256 indexed campaignId, address campaignAddress, string description, address organizationAddress, uint256 duration, uint256 targetAmount);
-    event Contributed(uint256 indexed campaignId, address contributor, uint256 amount);
+    event CampaignCreated(
+        uint256 indexed campaignId,
+        address campaignAddress,
+        string description,
+        address organizationAddress,
+        uint256 duration,
+        uint256 targetAmount
+    );
+    event Contributed(
+        uint256 indexed campaignId,
+        address contributor,
+        uint256 amount
+    );
     event CampaignEnded(uint256 indexed campaignId, bool successful);
     event ContributionsRefunded(uint256 indexed campaignId);
 
-    function createCampaign(string memory description, address _organizationAddress, address payable _actionAddress, uint256 duration, uint256 amount) external {
-        require(Organization(_organizationAddress).balanceOf(msg.sender) > 0, "Caller does not hold an organization NFT");
+    function createCampaign(
+        string memory description,
+        address _organizationAddress,
+        address payable _actionAddress,
+        uint256 duration,
+        uint256 amount
+    ) external {
+        require(
+            Organization(_organizationAddress).balanceOf(msg.sender) > 0,
+            "Caller does not hold an organization NFT"
+        );
 
-        uint256 targetAmount = Action(_actionAddress).getPricePerUnit() * amount;
-        Campaign newCampaign = new Campaign(nextCampaignId, description, _organizationAddress, _actionAddress, targetAmount, block.timestamp, duration, msg.sender);
-        
+        uint256 targetAmount = Action(_actionAddress).getPricePerUnit() *
+            amount;
+        Campaign newCampaign = new Campaign(
+            nextCampaignId,
+            description,
+            _organizationAddress,
+            _actionAddress,
+            targetAmount,
+            block.timestamp,
+            duration,
+            msg.sender
+        );
+
         campaigns[nextCampaignId] = address(newCampaign);
         organizationCampaigns[_organizationAddress].push(nextCampaignId);
 
-        emit CampaignCreated(nextCampaignId, address(newCampaign), description, _organizationAddress, duration, targetAmount);
+        emit CampaignCreated(
+            nextCampaignId,
+            address(newCampaign),
+            description,
+            _organizationAddress,
+            duration,
+            targetAmount
+        );
         nextCampaignId++;
     }
 
-    function getCampaignsByOrganization(address _organizationAddress) external view returns (CampaignInfo[] memory) {
-        uint256[] memory campaignIds = organizationCampaigns[_organizationAddress];
+    function getCampaignsByOrganization(
+        address _organizationAddress
+    ) external view returns (CampaignInfo[] memory) {
+        uint256[] memory campaignIds = organizationCampaigns[
+            _organizationAddress
+        ];
         uint256 activeCampaignCount = 0;
 
         for (uint256 i = 0; i < campaignIds.length; i++) {
             Campaign campaign = Campaign(payable(campaigns[campaignIds[i]]));
-            if (campaign.active()) { // Check if campaign is active
+            if (campaign.active()) {
                 activeCampaignCount++;
             }
         }
@@ -59,7 +100,7 @@ contract Fundraising {
 
         for (uint256 i = 0; i < campaignIds.length; i++) {
             Campaign campaign = Campaign(payable(campaigns[campaignIds[i]]));
-            if (campaign.active()) { // Only include active campaigns
+            if (campaign.active()) {
                 result[resultIndex] = CampaignInfo({
                     id: campaign.id(),
                     campaignAddress: campaigns[campaignIds[i]],

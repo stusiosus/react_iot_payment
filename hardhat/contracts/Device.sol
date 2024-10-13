@@ -58,4 +58,12 @@ contract Device is Ownable {
         );
         name = _newName;
     }
+
+    function selfDestruct() external {
+        require(
+            msg.sender == deviceFactoryAddress,
+            "Only the DeviceFactory can self-destruct this contract"
+        );
+        selfdestruct(payable(owner()));
+    }
 }

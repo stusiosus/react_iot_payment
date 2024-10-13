@@ -26,16 +26,44 @@ contract DeviceFactory {
     event DeviceUpdated(uint256 indexed id, string newName);
     event DeviceDeleted(uint256 indexed id);
 
-    function createDevice(
-        string memory _name,
-        address _actionFactoryAddress,
-        address _organizationAddress
-    ) public returns (address) {
+    modifier onlyAdmin(address _organizationAddress) {
         require(
             Organization(_organizationAddress).isAdmin(msg.sender),
             "No AdminNFT -> not allowed to create a Device"
         );
+        _;
+    }
 
+    modifier deviceExists(uint256 _deviceId) {
+        require(
+            Devices[_deviceId].deviceAddress != address(0),
+            "Device does not exist"
+        );
+        _;
+    }
+
+    modifier onlyDeviceOwner(uint256 _deviceId) {
+        Device device = Device(Devices[_deviceId].deviceAddress);
+        require(
+            msg.sender == device.owner(),
+            "You are not the Owner of this Device"
+        );
+        _;
+    }
+
+    modifier onlyUserWithNFT(address _organizationAddress) {
+        require(
+            Organization(_organizationAddress).balanceOf(msg.sender) > 0,
+            "No UserNFT -> not allowed to get devices"
+        );
+        _;
+    }
+
+    function createDevice(
+        string memory _name,
+        address _actionFactoryAddress,
+        address _organizationAddress
+    ) public onlyAdmin(_organizationAddress) returns (address) {
         Device newDevice = new Device(
             deviceCounter,
             _name,
@@ -44,6 +72,7 @@ contract DeviceFactory {
             address(this),
             _organizationAddress
         );
+
         emit DeviceCreated(
             address(newDevice),
             deviceCounter,
@@ -66,44 +95,18 @@ contract DeviceFactory {
     function updateDeviceName(
         uint256 _deviceId,
         string memory _newName
-    ) public {
-        require(
-            Devices[_deviceId].deviceAddress != address(0),
-            "Device does not exist"
-        );
-        require(
-            Organization(Devices[_deviceId].organisationAddress).isAdmin(
-                msg.sender
-            ),
-            "No AdminNFT -> not allowed to update the device"
-        );
+    ) public deviceExists(_deviceId) onlyDeviceOwner(_deviceId) {
         Device device = Device(Devices[_deviceId].deviceAddress);
-        require(
-            msg.sender == device.owner(),
-            "You are not the Owner of this Device"
-        );
         device.updateName(_newName);
         Devices[_deviceId].name = _newName;
         emit DeviceUpdated(_deviceId, _newName);
     }
 
-    function deleteDevice(uint256 _deviceId) public {
-        require(
-            Devices[_deviceId].deviceAddress != address(0),
-            "Device does not exist"
-        );
-        require(
-            Organization(Devices[_deviceId].organisationAddress).isAdmin(
-                msg.sender
-            ),
-            "No AdminNFT -> not allowed to delete the device"
-        );
-
+    function deleteDevice(
+        uint256 _deviceId
+    ) public deviceExists(_deviceId) onlyDeviceOwner(_deviceId) {
         Device device = Device(Devices[_deviceId].deviceAddress);
-        require(
-            msg.sender == device.owner(),
-            "You are not the Owner of this Device"
-        );
+        device.selfDestruct();
 
         delete Devices[_deviceId];
 
@@ -112,12 +115,12 @@ contract DeviceFactory {
 
     function getDevices(
         address _organizationAddress
-    ) external view returns (DeviceInfo[] memory) {
-        require(
-            Organization(_organizationAddress).balanceOf(msg.sender) > 0,
-            "No UserNFT -> not allowed to get devices"
-        );
-
+    )
+        external
+        view
+        onlyUserWithNFT(_organizationAddress)
+        returns (DeviceInfo[] memory)
+    {
         uint256 validDeviceCount = 0;
 
         for (uint256 i = 1; i < deviceCounter; i++) {

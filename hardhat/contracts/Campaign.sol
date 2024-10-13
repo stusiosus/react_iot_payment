@@ -41,7 +41,10 @@ contract Campaign {
     }
 
     receive() external payable {
-        require(block.timestamp <= startTime + duration, "Fundraising period has ended");
+        require(
+            block.timestamp <= startTime + duration,
+            "Fundraising period has ended"
+        );
 
         contributions[msg.sender] += msg.value;
         totalAmount += msg.value;
@@ -55,7 +58,11 @@ contract Campaign {
     }
 
     function endCampaign() public {
-        require(block.timestamp > startTime + duration || totalAmount >= targetAmount, "Fundraising period has not ended");
+        require(
+            block.timestamp > startTime + duration ||
+                totalAmount >= targetAmount,
+            "Fundraising period has not ended"
+        );
 
         bool successful = totalAmount >= targetAmount;
 
@@ -86,7 +93,9 @@ contract Campaign {
         emit ContributionsRefunded();
     }
 
-    function getContributions(address contributor) external view returns (uint256) {
+    function getContributions(
+        address contributor
+    ) external view returns (uint256) {
         return contributions[contributor];
     }
 
